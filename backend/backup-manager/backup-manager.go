@@ -141,3 +141,28 @@ func (b BackupManager) CreateBackup(destination BackupDestination) error {
 	return err
 
 }
+
+func (b BackupManager) DeleteBackup(destination BackupDestination, filename string) error {
+	switch destination {
+	case BackupFilesystem:
+		log.Printf("Deleting backup file: %s", filename)
+
+		backupPath := filepath.Join(LOCAL_BACKUP_DIR, b.DBName, filename)
+
+		if _, err := os.Stat(backupPath); os.IsNotExist(err) {
+			log.Printf("Backup file does not exist: %s", backupPath)
+			return fmt.Errorf("backup file not found: %s", filename)
+		}
+
+		if err := os.Remove(backupPath); err != nil {
+			log.Printf("Error deleting backup file: %v", err)
+			return fmt.Errorf("failed to delete backup file: %v", err)
+		}
+
+		log.Printf("Successfully deleted backup file: %s", filename)
+		return nil
+	}
+
+	log.Printf("Unable to delete backup from destination: %s", destination)
+	return fmt.Errorf("unsupported backup destination: %s", destination)
+}

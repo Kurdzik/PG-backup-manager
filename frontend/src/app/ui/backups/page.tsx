@@ -37,10 +37,11 @@ import {
   IconServer,
   IconCalendar,
   IconClock,
+  IconAlertTriangle,
 } from '@tabler/icons-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-import { get, post } from "../../../lib/backendRequests";
+import { get, post, del } from "../../../lib/backendRequests";
 
 interface DatabaseConnection {
   id: number;
@@ -164,10 +165,11 @@ export default function BackupManagerDashboard() {
   const [backupsLoading, setBackupsLoading] = useState<boolean>(false);
   const [createBackupLoading, setCreateBackupLoading] = useState<boolean>(false);
   const [restoreModalOpened, setRestoreModalOpened] = useState<boolean>(false);
-  const [confirmModalOpened, setConfirmModalOpened] = useState<boolean>(false);
+  const [deleteModalOpened, setDeleteModalOpened] = useState<boolean>(false);
   const [selectedBackupFile, setSelectedBackupFile] = useState<string | null>(null);
   const [actionType, setActionType] = useState<'restore' | 'delete'>('restore');
   const [notification, setNotification] = useState<NotificationData | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
   useEffect(() => {
     loadConnections();
@@ -360,10 +362,37 @@ export default function BackupManagerDashboard() {
     }
   };
 
+  const handleDelete = async (): Promise<void> => {
+    if (!selectedDatabase || !selectedBackupFile) return;
+    
+    try {
+      setDeleteLoading(true);
+      const response: ApiResponse = await del(`backup/delete?database_id=${selectedDatabase}&destination=${backupDestination}&filename=${selectedBackupFile}`);
+      
+      if (response.status === 'OK') {
+        showNotification('success', 'Success', 'Backup deleted successfully');
+        loadBackups(); // Refresh the backup list
+      }
+    } catch (err) {
+      showNotification('error', 'Error', 'Failed to delete backup');
+      console.error("Error deleting backup:", err);
+    } finally {
+      setDeleteLoading(false);
+      setDeleteModalOpened(false);
+      setSelectedBackupFile(null);
+    }
+  };
+
   const openRestoreModal = (filename: string): void => {
     setSelectedBackupFile(filename);
     setActionType('restore');
     setRestoreModalOpened(true);
+  };
+
+  const openDeleteModal = (filename: string): void => {
+    setSelectedBackupFile(filename);
+    setActionType('delete');
+    setDeleteModalOpened(true);
   };
 
   const getSelectedConnectionName = (): string => {
@@ -426,6 +455,14 @@ export default function BackupManagerDashboard() {
             aria-label={`Restore backup ${backup.filename}`}
           >
             <IconRestore size={16} />
+          </ActionIcon>
+          <ActionIcon
+            variant="subtle"
+            color="red"
+            onClick={() => openDeleteModal(backup.filename)}
+            aria-label={`Delete backup ${backup.filename}`}
+          >
+            <IconTrash size={16} />
           </ActionIcon>
         </Group>
       </Table.Td>
@@ -699,6 +736,54 @@ export default function BackupManagerDashboard() {
               onClick={handleRestore}
             >
               Restore Database
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        opened={deleteModalOpened}
+        onClose={() => setDeleteModalOpened(false)}
+        title={
+          <Flex align="center" gap="sm">
+            <IconAlertTriangle size={20} color="#fa5252" />
+            <Text fw={600} size="lg">
+              Delete Backup
+            </Text>
+          </Flex>
+        }
+        size="xl"
+        centered
+      >
+        <Stack gap="lg">
+          <Text size="md">
+            Are you sure you want to permanently delete the backup{' '}
+            <Text span fw={600}>
+              "{selectedBackupFile}"
+            </Text>
+            ?
+          </Text>
+          <Alert color="red" icon={<IconAlertTriangle size={16} />}>
+            <Text size="sm">
+              This action cannot be undone. The backup file will be permanently removed from {backupDestination} storage.
+            </Text>
+          </Alert>
+          
+          <Group justify="flex-end" mt="lg">
+            <Button 
+              variant="subtle" 
+              onClick={() => setDeleteModalOpened(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              color="red"
+              loading={deleteLoading}
+              onClick={handleDelete}
+              leftSection={<IconTrash size={16} />}
+            >
+              Delete Backup
             </Button>
           </Group>
         </Stack>

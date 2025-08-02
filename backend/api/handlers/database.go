@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"pg_bckup_mgr/auth"
 	"pg_bckup_mgr/db"
 	"strconv"
 
@@ -9,7 +10,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// CreateConnectionRequest represents the request body for creating a connection
 type CreateConnectionRequest struct {
 	PostgresHost     string `json:"postgres_host" binding:"required"`
 	PostgresPort     string `json:"postgres_port" binding:"required"`
@@ -18,7 +18,6 @@ type CreateConnectionRequest struct {
 	PostgresPassword string `json:"postgres_password" binding:"required"`
 }
 
-// UpdateConnectionRequest represents the request body for updating a connection
 type UpdateConnectionRequest struct {
 	PostgresHost     string `json:"postgres_host"`
 	PostgresPort     string `json:"postgres_port"`
@@ -40,12 +39,20 @@ func CreateConnection(conn *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		encryptedPassword, err := auth.EncryptPassword(req.PostgresPassword)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status": "validation error",
+				"error":  err.Error(),
+			})
+			return
+		}
 		connection := db.Connections{
 			PostgresHost:     req.PostgresHost,
 			PostgresPort:     req.PostgresPort,
 			PostgresDBName:   req.PostgresDBName,
 			PostgresUser:     req.PostgresUser,
-			PostgresPassword: req.PostgresPassword,
+			PostgresPassword: encryptedPassword,
 		}
 
 		err = db.AddCredentials(conn, connection)
@@ -64,36 +71,6 @@ func CreateConnection(conn *gorm.DB) gin.HandlerFunc {
 	}
 }
 
-// GetConnection retrieves a connection by ID
-// func GetConnection(conn *gorm.DB) gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		connId := c.Param("id")
-// 		id, err := strconv.Atoi(connId)
-// 		if err != nil {
-// 			c.JSON(http.StatusBadRequest, gin.H{
-// 				"status": "invalid connection ID",
-// 				"error":  err.Error(),
-// 			})
-// 			return
-// 		}
-
-// 		connection, err := db.GetCredentialsById(conn, id)
-// 		if err != nil {
-// 			c.JSON(http.StatusNotFound, gin.H{
-// 				"status": "connection not found",
-// 				"error":  err.Error(),
-// 			})
-// 			return
-// 		}
-
-// 		c.JSON(http.StatusOK, gin.H{
-// 			"status": "OK",
-// 			"data":   connection,
-// 		})
-// 	}
-// }
-
-// ListConnections retrieves all connections
 func ListConnections(conn *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		connections, err := db.ListAllCredentials(conn)
@@ -113,7 +90,6 @@ func ListConnections(conn *gorm.DB) gin.HandlerFunc {
 	}
 }
 
-// UpdateConnection updates an existing connection
 func UpdateConnection(conn *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		connectionId := c.Query("connection_id")
@@ -136,7 +112,6 @@ func UpdateConnection(conn *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Get existing connection
 		connection, err := db.GetCredentialsById(conn, id)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{
@@ -146,7 +121,6 @@ func UpdateConnection(conn *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Update fields if provided
 		if req.PostgresHost != "" {
 			connection.PostgresHost = req.PostgresHost
 		}
@@ -159,8 +133,17 @@ func UpdateConnection(conn *gorm.DB) gin.HandlerFunc {
 		if req.PostgresUser != "" {
 			connection.PostgresUser = req.PostgresUser
 		}
+
 		if req.PostgresPassword != "" {
-			connection.PostgresPassword = req.PostgresPassword
+			encryptedPassword, err := auth.EncryptPassword(req.PostgresPassword)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status": "validation error",
+					"error":  err.Error(),
+				})
+				return
+			}
+			connection.PostgresPassword = encryptedPassword
 		}
 
 		err = db.UpdateCredentials(conn, connection)
@@ -179,7 +162,6 @@ func UpdateConnection(conn *gorm.DB) gin.HandlerFunc {
 	}
 }
 
-// DeleteConnection deletes a connection by ID
 func DeleteConnection(conn *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		connectionId := c.Query("connection_id")

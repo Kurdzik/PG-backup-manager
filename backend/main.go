@@ -36,6 +36,7 @@ func main() {
 	api.POST("/backup/create", handlers.CreateBackup(dbConn))
 	api.POST("/backup/restore", handlers.RestoreFromBackup(dbConn))
 	api.GET("/backup/list", handlers.ListBackups(dbConn))
+	api.DELETE("/backup/delete", handlers.DeleteBackup(dbConn))
 
 	api.POST("/connections/create", handlers.CreateConnection(dbConn))
 	api.GET("/connections/list", handlers.ListConnections(dbConn))

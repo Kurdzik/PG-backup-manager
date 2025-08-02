@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"pg_bckup_mgr/auth"
 	bck "pg_bckup_mgr/backup-manager"
 	"pg_bckup_mgr/db"
 
@@ -37,12 +38,13 @@ func CreateBackup(conn *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		decryptedPassword, _ := auth.DecryptPassword(creds.PostgresPassword)
 		bckupManager := bck.BackupManager{
 			Host:     creds.PostgresHost,
 			Port:     creds.PostgresPort,
 			DBName:   creds.PostgresDBName,
 			User:     creds.PostgresUser,
-			Password: creds.PostgresPassword,
+			Password: decryptedPassword,
 		}
 
 		err = bckupManager.CreateBackup(bck.BackupDestination(r.Destination))
@@ -119,12 +121,13 @@ func RestoreFromBackup(conn *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		decryptedPassword, _ := auth.DecryptPassword(creds.PostgresPassword)
 		bckupManager := bck.BackupManager{
 			Host:     creds.PostgresHost,
 			Port:     creds.PostgresPort,
 			DBName:   creds.PostgresDBName,
 			User:     creds.PostgresUser,
-			Password: creds.PostgresPassword,
+			Password: decryptedPassword,
 		}
 
 		err = bckupManager.RestoreFromBackup(bck.BackupDestination(r.Destination), r.Filename)
@@ -137,6 +140,65 @@ func RestoreFromBackup(conn *gorm.DB) gin.HandlerFunc {
 
 		c.JSON(http.StatusOK, gin.H{
 			"status": "OK",
+		})
+
+	}
+}
+
+func DeleteBackup(conn *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		databaseId, err := strconv.Atoi(c.Query("database_id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status": "Invalid database_id parameter",
+			})
+			return
+		}
+
+		backupDestination := c.Query("destination")
+		if backupDestination == "" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status": "destination parameter is required",
+			})
+			return
+		}
+
+		filename := c.Query("filename")
+		if filename == "" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status": "filename parameter is required",
+			})
+			return
+		}
+
+		creds, err := db.GetCredentialsById(conn, databaseId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status": err.Error(),
+			})
+			return
+		}
+		decryptedPassword, _ := auth.DecryptPassword(creds.PostgresPassword)
+		bckupManager := bck.BackupManager{
+			Host:     creds.PostgresHost,
+			Port:     creds.PostgresPort,
+			DBName:   creds.PostgresDBName,
+			User:     creds.PostgresUser,
+			Password: decryptedPassword,
+		}
+
+		err = bckupManager.DeleteBackup(bck.BackupDestination(backupDestination), filename)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status": err.Error(),
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"status": "OK",
+			"msg":    "Backup deleted successfully",
 		})
 
 	}
