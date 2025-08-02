@@ -2,131 +2,131 @@
 import { createTheme, rem } from "@mantine/core";
 
 export const theme = createTheme({
-  defaultRadius: "md",
+  defaultRadius: "sm", // Subtle rounded edges
   cursorType: "pointer",
 
-  primaryColor: "brand",
+  primaryColor: "slate",
   primaryShade: { light: 6, dark: 5 },
 
-  // Microsoft Fluent Design inspired typography
-  fontFamily: `"Segoe UI", -apple-system, BlinkMacSystemFont, "Roboto", "Helvetica Neue", Arial, sans-serif`,
+  // Modern, clean typography
+  fontFamily: `"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif`,
 
   fontSizes: {
-    xs: rem(11),
-    sm: rem(13),
-    md: rem(15),
-    lg: rem(17),
-    xl: rem(20),
+    xs: rem(10),
+    sm: rem(12),
+    md: rem(14),
+    lg: rem(16),
+    xl: rem(18),
   },
 
   colors: {
-    brand: [
+    slate: [
       "#f8fafc",
-      "#e6eff7",
-      "#cadcf0",
-      "#9fc0e2",
-      "#7ba4d4",
-      "#5c8acc", // ⬅️ primary
-      "#4e78b5",
-      "#40679e",
-      "#355883",
-      "#2b4869",
+      "#f1f5f9",
+      "#e2e8f0",
+      "#cbd5e1",
+      "#94a3b8",
+      "#64748b", // ⬅️ primary - modern slate
+      "#475569",
+      "#334155",
+      "#1e293b",
+      "#0f172a",
     ],
     neutral: [
-      "#f9f9fa",
-      "#f1f2f4",
-      "#dddddf",
-      "#c5c6cb",
-      "#a1a2a9",
-      "#7e7f88", // previous: #71717a
-      "#63646d", // slightly darker
-      "#4c4d55", // good for borders
-      "#37383e",
-      "#24252b",
+      "#ffffff",
+      "#f8fafc",
+      "#f1f5f9",
+      "#e2e8f0",
+      "#cbd5e1",
+      "#94a3b8",
+      "#64748b",
+      "#475569", // Subtle borders
+      "#334155",
+      "#1e293b",
     ],
     success: [
-      "#f4f8f5",
-      "#def1e3",
-      "#c5e4ce",
-      "#a3d2b3",
-      "#7fbe97",
-      "#5ca07e", // ⬅️ slight pop, still muted
-      "#488669",
-      "#386d55",
-      "#2b5442",
-      "#203d31",
+      "#f0fdf4",
+      "#dcfce7",
+      "#bbf7d0",
+      "#86efac",
+      "#4ade80",
+      "#22c55e", // ⬅️ clean green but muted
+      "#16a34a",
+      "#15803d",
+      "#166534",
+      "#14532d",
     ],
     warning: [
-      "#fffaf4",
-      "#fef0da",
-      "#fde0b3",
-      "#fbc87f",
-      "#f8ae4f",
-      "#e49130", // ⬅️ earthy amber
-      "#c47321",
-      "#9d5814",
-      "#7a410b",
-      "#572d06",
+      "#fffbeb",
+      "#fef3c7",
+      "#fde68a",
+      "#fcd34d",
+      "#fbbf24",
+      "#f59e0b", // ⬅️ clean amber
+      "#d97706",
+      "#b45309",
+      "#92400e",
+      "#78350f",
     ],
     error: [
-      "#fdf7f7",
-      "#f6e3e3",
-      "#edcdcd",
-      "#dda6a6",
-      "#ca7d7d",
-      "#b25e5e", // ⬅️ balanced red tone
-      "#934848",
-      "#763636",
-      "#5a2727",
-      "#421b1b",
+      "#fef2f2",
+      "#fecaca",
+      "#fca5a5",
+      "#f87171",
+      "#ef4444",
+      "#dc2626", // ⬅️ clean red but restrained
+      "#b91c1c",
+      "#991b1b",
+      "#7f1d1d",
+      "#450a0a",
     ],
     info: [
-      "#f6fafd",
-      "#eaf1f9",
-      "#d6e3f3",
-      "#b7cde7",
-      "#94b3da",
-      "#7499cb", // ⬅️ slate-blue for feedback/info
-      "#5d7eac",
-      "#4c6991",
-      "#3b5477",
-      "#2b405d",
+      "#f0f9ff",
+      "#e0f2fe",
+      "#bae6fd",
+      "#7dd3fc",
+      "#38bdf8",
+      "#0ea5e9", // ⬅️ clean blue
+      "#0284c7",
+      "#0369a1",
+      "#075985",
+      "#0c4a6e",
     ],
   },
 
   headings: {
-    fontFamily: `"Segoe UI", -apple-system, BlinkMacSystemFont, "Roboto", "Helvetica Neue", Arial, sans-serif`,
-    fontWeight: "600",
+    fontFamily: `"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif`,
+    fontWeight: "500", // Modern medium weight
     sizes: {
       h1: {
         fontSize: rem(32),
-        lineHeight: "1.25",
-        fontWeight: "700",
+        lineHeight: "1.2",
+        fontWeight: "600",
       },
       h2: {
         fontSize: rem(24),
-        lineHeight: "1.3",
+        lineHeight: "1.25",
         fontWeight: "600",
       },
       h3: {
         fontSize: rem(20),
-        lineHeight: "1.35",
-        fontWeight: "600",
+        lineHeight: "1.3",
+        fontWeight: "500",
       },
       h4: {
         fontSize: rem(18),
-        lineHeight: "1.4",
-        fontWeight: "600",
+        lineHeight: "1.35",
+        fontWeight: "500",
       },
       h5: {
         fontSize: rem(16),
-        lineHeight: "1.45",
-        fontWeight: "600",
+        lineHeight: "1.4",
+        fontWeight: "500",
       },
       h6: {
         fontSize: rem(14),
-        lineHeight: "1.5",
-        fontWeight: "600",
+        lineHeight: "1.45",
+        fontWeight: "500",
       },
     },
   },
@@ -139,16 +139,16 @@ export const theme = createTheme({
     xl: rem(40),
   },
 
-  // Modern shadow system
+  // Clean, modern shadows
   shadows: {
-    xs: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
-    sm: "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
-    md: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
-    lg: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
-    xl: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
+    xs: "0 1px 2px 0 rgb(0 0 0 / 0.03)",
+    sm: "0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06)",
+    md: "0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07)",
+    lg: "0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08)",
+    xl: "0 20px 25px -5px rgb(0 0 0 / 0.09), 0 8px 10px -6px rgb(0 0 0 / 0.09)",
   },
 
-  // Component-specific customizations
+  // Modern, clean components
   components: {
     Button: {
       defaultProps: {
@@ -156,9 +156,13 @@ export const theme = createTheme({
       },
       styles: {
         root: {
-          borderRadius: rem(6),
+          borderRadius: rem(6), // Small rounded corners
           fontWeight: 500,
           fontSize: rem(14),
+          transition: "all 150ms ease",
+          "&:hover": {
+            transform: "translateY(-1px)",
+          },
         },
       },
     },
@@ -166,11 +170,12 @@ export const theme = createTheme({
     Card: {
       defaultProps: {
         shadow: "sm",
-        radius: "md",
+        radius: "sm",
       },
       styles: {
         root: {
-          border: "1px solid var(--mantine-color-neutral-2)",
+          border: "1px solid var(--mantine-color-neutral-3)",
+          backgroundColor: "var(--mantine-color-neutral-0)",
         },
       },
     },
@@ -179,11 +184,13 @@ export const theme = createTheme({
       styles: {
         input: {
           borderRadius: rem(6),
-          border: "1px solid var(--mantine-color-neutral-3)",
+          border: "1px solid var(--mantine-color-neutral-4)",
           fontSize: rem(14),
+          backgroundColor: "var(--mantine-color-neutral-0)",
+          transition: "all 150ms ease",
           "&:focus": {
-            borderColor: "var(--mantine-color-brand-6)",
-            boxShadow: "0 0 0 2px var(--mantine-color-brand-1)",
+            borderColor: "var(--mantine-color-slate-6)",
+            boxShadow: "0 0 0 3px var(--mantine-color-slate-1)",
           },
         },
       },
@@ -192,57 +199,61 @@ export const theme = createTheme({
     Paper: {
       defaultProps: {
         shadow: "xs",
-        radius: "md",
+        radius: "sm",
+      },
+      styles: {
+        root: {
+          border: "1px solid var(--mantine-color-neutral-2)",
+        },
       },
     },
 
     Modal: {
       styles: {
         content: {
-          borderRadius: rem(12),
+          borderRadius: rem(8),
+          border: "1px solid var(--mantine-color-neutral-3)",
         },
         header: {
-          borderBottom: "1px solid var(--mantine-color-neutral-2)",
+          borderBottom: "1px solid var(--mantine-color-neutral-3)",
           paddingBottom: rem(16),
           marginBottom: rem(16),
+        },
+      },
+    },
+
+    Divider: {
+      styles: {
+        root: {
+          borderColor: "var(--mantine-color-neutral-3)",
         },
       },
     },
   },
 
   other: {
-    borderRadius: rem(8),
-    transitionSpeed: "150ms",
-    borderColor: "var(--mantine-color-neutral-4)", // NEW
+    borderRadius: rem(6), // Small rounded corners
+    transitionSpeed: "150ms", // Smooth but quick
+    borderColor: "var(--mantine-color-neutral-3)",
     elevation: {
-      subtle: "0 1px 2px rgba(0,0,0,0.04)",
-      card: "0 2px 4px rgba(0,0,0,0.08)",
-      elevated: "0 4px 8px rgba(0,0,0,0.12)",
-      floating: "0 8px 16px rgba(0,0,0,0.16)",
+      subtle: "0 1px 2px rgba(0,0,0,0.03)",
+      card: "0 2px 4px rgba(0,0,0,0.06)",
+      elevated: "0 4px 8px rgba(0,0,0,0.08)",
+      floating: "0 8px 16px rgba(0,0,0,0.10)",
     }, 
   },
 });
 
-// Very muted professional color palette for charts and data visualization
+// Clean, modern palette for charts and data visualization
 export const colors = [
-  // "#5c8acc", // brand blue
-  "#5ca07e", // balanced green
-  "#e49130", // amber
-  "#b25e5e", // mellow red
-  "#8581b9", // desaturated violet
-  "#679aa6", // dusty cyan
-  "#85a354", // olive green
-  "#b9864a", // copper orange
-  "#a77895", // mauve pink
-  "#6e7cb3", // indigo
-  "#5b998d", // teal
-  "#b29a3d", // muted gold
-  "#80858e", // neutral slate
-  "#9d6363", // rust red
-  "#917cb3", // soft purple
-  "#52876d", // hunter green
-  "#a68a5f", // tan amber
-  "#5d94a1", // dusty cyan (alt)
-  "#78905e", // sage green
-  "#ba7742", // orange-brown
+  "#64748b", // slate
+  "#22c55e", // green
+  "#f59e0b", // amber  
+  "#dc2626", // red
+  "#0ea5e9", // blue
+  "#8b5cf6", // purple
+  "#06b6d4", // cyan
+  "#84cc16", // lime
+  "#f97316", // orange
+  "#ec4899", // pink
 ];

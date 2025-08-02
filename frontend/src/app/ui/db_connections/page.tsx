@@ -33,6 +33,7 @@ import {
   IconX,
   IconInfoCircle,
   IconServer,
+  IconPlugConnected,
 } from '@tabler/icons-react';
 
 import { get, post, put, del } from "../../../lib/backendRequests";
@@ -66,6 +67,7 @@ interface ApiResponse<T = any> {
   data?: T;
   status?: string;
   count?: number;
+  message?: string;
 }
 
 // Custom notification component for bottom-right positioning
@@ -147,6 +149,7 @@ export default function DatabaseConnectionsDashboard() {
   });
   const [notification, setNotification] = useState<NotificationData | null>(null);
   const [formLoading, setFormLoading] = useState<boolean>(false);
+  const [testLoading, setTestLoading] = useState<boolean>(false);
 
   useEffect(() => {
     loadConnections();
@@ -170,6 +173,37 @@ export default function DatabaseConnectionsDashboard() {
     }
   };
 
+  const handleTestConnection = async (): Promise<void> => {
+    try {
+      setTestLoading(true);
+      
+      const response: ApiResponse = await post("connections/create?test_connection=true", formData);
+      
+      // Check for successful response
+      if (response.message || response.status?.includes("successfully") || response.status?.includes("success")) {
+        showNotification('success', 'Connection Test Successful', 
+          response.message || 'Database connection is valid and working correctly');
+      } else {
+        showNotification('error', 'Connection Test Failed', 
+          response.message || 'Unable to connect to database with provided credentials');
+      }
+    } catch (err: any) {
+      // Handle different types of errors
+      let errorMessage = 'Connection test failed. Please check your database credentials and network connectivity.';
+      
+      if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      showNotification('error', 'Connection Test Failed', errorMessage);
+      console.error("Error testing connection:", err);
+    } finally {
+      setTestLoading(false);
+    }
+  };
+
   const handleSubmit = async (): Promise<void> => {
     try {
       setFormLoading(true);
@@ -181,8 +215,8 @@ export default function DatabaseConnectionsDashboard() {
         response = await post("connections/create", formData);
       }
       
-      if (response.status?.includes("successfully")) {
-        showNotification('success', 'Success', response.status);
+      if (response.status?.includes("successfully") || response.message) {
+        showNotification('success', 'Success', response.message || response.status || 'Operation completed successfully');
         setDrawerOpened(false);
         resetForm();
         loadConnections();
@@ -342,7 +376,7 @@ export default function DatabaseConnectionsDashboard() {
               Database Connections
             </Title>
             <Text size="lg" c="dimmed">
-              Manage PostgreSQL connections for automated backups
+              Manage PostgreSQL connections
             </Text>
           </Box>
         </Flex>
@@ -464,9 +498,17 @@ export default function DatabaseConnectionsDashboard() {
           />
 
           <Group justify="flex-end" mt="lg">
-            <Button variant="subtle" onClick={closeDrawer}>
-              Cancel
-            </Button>
+            {!editingConnection && (
+              <Button
+                leftSection={<IconPlugConnected size={16} />}
+                variant="light"
+                onClick={handleTestConnection}
+                loading={testLoading}
+                disabled={!isFormValid()}
+              >
+                Test Connection
+              </Button>
+            )}
             <Button
               onClick={handleSubmit}
               loading={formLoading}

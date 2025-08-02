@@ -30,6 +30,8 @@ func CreateConnection(conn *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req CreateConnectionRequest
 
+		testFlag := c.Query("test_connection")
+
 		err := c.ShouldBindJSON(&req)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -53,6 +55,21 @@ func CreateConnection(conn *gorm.DB) gin.HandlerFunc {
 			PostgresDBName:   req.PostgresDBName,
 			PostgresUser:     req.PostgresUser,
 			PostgresPassword: encryptedPassword,
+		}
+
+		if testFlag == "true" {
+			if !db.TestConnection(connection) {
+				c.JSON(http.StatusRequestTimeout, gin.H{
+					"status": "failed to create connection",
+					"error":  "Could not reach specified Database",
+				})
+				return
+			} else {
+				c.JSON(http.StatusOK, gin.H{
+					"status": "Conection Test successful",
+				})
+				return
+			}
 		}
 
 		err = db.AddCredentials(conn, connection)

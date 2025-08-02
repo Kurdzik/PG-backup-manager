@@ -12,3 +12,19 @@ type Connections struct {
 	CreatedAt        time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt        time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 }
+
+// type Destinations struct {
+// 	ID              uint      `json:"destination_id" gorm:"primaryKey;autoIncrement"`
+// 	ConnectionID    uint      `json:"connection_id" gorm:"not null;index"`
+// 	Name            string    `json:"name" gorm:"type:varchar(255);not null;uniqueIndex"`
+// 	EndpointURL     string    `json:"endpoint_url" gorm:"type:varchar(500);not null"`
+// 	Region          string    `json:"region" gorm:"type:varchar(100)"`
+// 	BucketName      string    `json:"bucket_name" gorm:"type:varchar(255);not null"`
+// 	AccessKeyID     string    `json:"access_key_id" gorm:"type:varchar(255);not null"`
+// 	SecretAccessKey string    `json:"secret_access_key" gorm:"type:varchar(255);not null"`
+// 	PathPrefix      string    `json:"path_prefix" gorm:"type:varchar(500);default:''"`
+// 	UseSSL          bool      `json:"use_ssl" gorm:"default:true"`
+// 	VerifySSL       bool      `json:"verify_ssl" gorm:"default:true"`
+// 	CreatedAt       time.Time `json:"created_at" gorm:"autoCreateTime"`
+// 	UpdatedAt       time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+// }
