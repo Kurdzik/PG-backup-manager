@@ -46,7 +46,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import BottomRightNotification from "@/components/Notifications";
 import {NotificationData} from "@/components/Notifications";
 import { get, post, put, del } from "@/lib/backendRequests";
-import {BackupDestination, DatabaseConnection} from "@/lib/types"
+import {BackupDestination, DatabaseConnection, ApiResponse} from "@/lib/types"
 
 interface BackupFile {
   filename: string;
@@ -62,21 +62,6 @@ interface BackupStats {
 }
 
 
-
-interface ApiResponse<T = any> {
-  data?: T;
-  payload?: string[];
-  status?: string;
-  count?: number;
-  pagination?: {
-    has_next: boolean;
-    has_prev: boolean;
-    limit: number;
-    page: number;
-    total: number;
-    total_pages: number;
-  };
-}
 
 interface ChartDataPoint {
   date: string;

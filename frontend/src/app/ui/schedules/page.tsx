@@ -54,7 +54,7 @@ import {
 import { get, post, put, del } from "@/lib/backendRequests";
 import BottomRightNotification from "@/components/Notifications";
 import {NotificationData} from "@/components/Notifications";
-import {BackupDestination, DatabaseConnection} from "@/lib/types"
+import {BackupDestination, DatabaseConnection, ApiResponse} from "@/lib/types"
 
 
 
@@ -79,13 +79,6 @@ interface ScheduleFormData {
   enabled: boolean;
 }
 
-interface ApiResponse<T = any> {
-  data?: T;
-  status?: string;
-  count?: number;
-  message?: string;
-  schedules?: T;
-}
 
 interface ScheduleStats {
   total: number;
@@ -156,7 +149,7 @@ export default function BackupScheduleDashboard() {
       
       setConnections(connectionsRes.data || []);
       setDestinations(destinationsRes.data || []);
-      setSchedules(schedulesRes.schedules || []);
+      setSchedules(schedulesRes.data || []);
     } catch (err) {
       showNotification('error', 'Error', 'Failed to load data');
       console.error("Error loading data:", err);

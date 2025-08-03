@@ -281,9 +281,9 @@ func ListSchedules(conn *gorm.DB) gin.HandlerFunc {
 
 		log.Printf("Found %d schedules", len(schedules))
 		c.JSON(http.StatusOK, gin.H{
-			"status":    "OK",
-			"schedules": schedules,
-			"count":     len(schedules),
+			"status": "OK",
+			"data":   schedules,
+			"count":  len(schedules),
 		})
 	}
 }

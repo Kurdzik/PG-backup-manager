@@ -25,3 +25,18 @@ export interface DatabaseConnection {
   created_at: string;
   updated_at: string;
 }
+
+export interface ApiResponse<T = any> {
+  data?: T;
+  payload?: string[];
+  status?: string;
+  count?: number;
+  pagination?: {
+    has_next: boolean;
+    has_prev: boolean;
+    limit: number;
+    page: number;
+    total: number;
+    total_pages: number;
+  };
+}

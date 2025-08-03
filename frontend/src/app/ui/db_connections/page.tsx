@@ -39,7 +39,7 @@ import {
 import { get, post, put, del } from "@/lib/backendRequests";
 import BottomRightNotification from "@/components/Notifications";
 import {NotificationData } from "@/components/Notifications";
-import {DatabaseConnection} from "@/lib/types"
+import {DatabaseConnection, ApiResponse} from "@/lib/types"
 
 
 interface ConnectionFormData {
@@ -50,29 +50,6 @@ interface ConnectionFormData {
   postgres_password: string;
 }
 
-
-// interface ApiResponse<T = any> {
-//   data?: T;
-//   status?: string;
-//   count?: number;
-//   message?: string;
-// }
-
-
-interface ApiResponse<T = any> {
-  data?: T;
-  msg?: string[];
-  status?: string;
-  count?: number;
-  pagination?: {
-    has_next: boolean;
-    has_prev: boolean;
-    limit: number;
-    page: number;
-    total: number;
-    total_pages: number;
-  };
-}
 
 
 export default function DatabaseConnectionsDashboard() {

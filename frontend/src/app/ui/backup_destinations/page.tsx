@@ -39,7 +39,7 @@ import {
 import { get, post, put, del } from "@/lib/backendRequests";
 import BottomRightNotification from "@/components/Notifications";
 import {NotificationData} from "@/components/Notifications";
-import {BackupDestination, DatabaseConnection} from "@/lib/types"
+import {BackupDestination, DatabaseConnection, ApiResponse} from "@/lib/types"
 
 
 interface DestinationFormData {
@@ -53,22 +53,6 @@ interface DestinationFormData {
   path_prefix: string;
   use_ssl: boolean;
   verify_ssl: boolean;
-}
-
-
-interface ApiResponse<T = any> {
-  data?: T;
-  status?: string;
-  count?: number;
-  message?: string;
-  pagination?: {
-    has_next: boolean;
-    has_prev: boolean;
-    limit: number;
-    page: number;
-    total: number;
-    total_pages: number;
-  };
 }
 
 
@@ -136,12 +120,10 @@ export default function S3BackupDestinations() {
       const response: ApiResponse = await post("backup-destinations/s3/create?test_connection=true", payload);
       
       // Check for successful response
-      if (response.message || response.status?.includes("successfully") || response.status?.includes("success")) {
-        showNotification('success', 'Connection Test Successful', 
-          response.message || 'S3 destination configuration is valid and connection successful');
+      if (response.status?.includes("successfully") || response.status?.includes("success")) {
+        showNotification('success', 'Connection Test Successful', 'S3 destination configuration is valid and connection successful');
       } else {
-        showNotification('error', 'Connection Test Failed', 
-          response.message || 'Unable to connect to S3 destination with provided configuration');
+        showNotification('error', 'Connection Test Failed', 'Unable to connect to S3 destination with provided configuration');
       }
     } catch (err: any) {
       // Handle different types of errors
@@ -177,8 +159,8 @@ export default function S3BackupDestinations() {
         response = await post("backup-destinations/s3/create", payload);
       }
       
-      if (response.message || response.status?.includes("successfully")) {
-        showNotification('success', 'Success', response.message || response.status || 'Operation completed successfully');
+      if (response.status || response.status?.includes("successfully")) {
+        showNotification('success', 'Success', response.status || 'Operation completed successfully');
         setDrawerOpened(false);
         resetForm();
         loadData();
