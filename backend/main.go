@@ -33,22 +33,34 @@ func main() {
 
 	api.GET("/healthcheck", handlers.Healthcheck())
 
+	// Backup endpoints
 	api.POST("/backup/create", handlers.CreateBackup(dbConn))
 	api.POST("/backup/restore", handlers.RestoreFromBackup(dbConn))
 	api.GET("/backup/list", handlers.ListBackups(dbConn))
 	api.DELETE("/backup/delete", handlers.DeleteBackup(dbConn))
 
+	// Backup destination endpoints
 	api.POST("/backup-destinations/s3/create", handlers.CreateBackupDestination(dbConn))
 	api.GET("/backup-destinations/s3/list", handlers.ListAllBackupDestinations(dbConn))
 	api.PUT("/backup-destinations/s3/update", handlers.UpdateBackupDestination(dbConn))
 	api.DELETE("/backup-destinations/s3/delete", handlers.DeleteBackupDestination(dbConn))
 
+	// Connection endpoints
 	api.POST("/connections/create", handlers.CreateConnection(dbConn))
 	api.GET("/connections/list", handlers.ListConnections(dbConn))
 	api.PUT("/connections/update", handlers.UpdateConnection(dbConn))
 	api.DELETE("/connections/delete", handlers.DeleteConnection(dbConn))
 
-	log.Println("Application Startup Complete!")
+	// Backup schedule endpoints
+	api.POST("/schedules/create", handlers.CreateSchedule(dbConn))
+	api.GET("/schedules/list", handlers.ListSchedules(dbConn))
+	api.GET("/schedules/get", handlers.GetSchedule(dbConn))
+	api.PUT("/schedules/update", handlers.UpdateSchedule(dbConn))
+	api.DELETE("/schedules/delete", handlers.DeleteSchedule(dbConn))
+	api.POST("/schedules/enable", handlers.EnableSchedule(dbConn))
+	api.POST("/schedules/disable", handlers.DisableSchedule(dbConn))
+
+	log.Println("🚀 Application Startup Complete! 🚀")
 	r.Run(":8080")
 
 }

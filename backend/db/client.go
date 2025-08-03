@@ -61,12 +61,12 @@ func AddCredentials(conn *gorm.DB, obj Connection) error {
 	return nil
 }
 
-func GetCredentialsById(conn *gorm.DB, id int) (Connection, error) {
+func GetCredentialsById(conn *gorm.DB, id string) (Connection, error) {
 	var connection Connection
 	result := conn.First(&connection, id)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			return connection, fmt.Errorf("credentials with id %d not found", id)
+			return connection, fmt.Errorf("credentials with id %s not found", id)
 		}
 		return connection, fmt.Errorf("failed to get credentials: %w", result.Error)
 	}
@@ -82,13 +82,13 @@ func ListAllCredentials(conn *gorm.DB) ([]Connection, error) {
 	return connections, nil
 }
 
-func DeleteCredentialsById(conn *gorm.DB, id int) error {
+func DeleteCredentialsById(conn *gorm.DB, id string) error {
 	result := conn.Delete(&Connection{}, id)
 	if result.Error != nil {
 		return fmt.Errorf("failed to delete credentials: %w", result.Error)
 	}
 	if result.RowsAffected == 0 {
-		return fmt.Errorf("credentials with id %d not found", id)
+		return fmt.Errorf("credentials with id %s not found", id)
 	}
 	return nil
 }
@@ -106,7 +106,7 @@ func GetBackupDestinationByID(conn *gorm.DB, id string) (Destination, error) {
 	result := conn.First(&destinations, id)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			return destinations, fmt.Errorf("backup destinations with id %d not found", id)
+			return destinations, fmt.Errorf("backup destinations with id %s not found", id)
 		}
 		return destinations, fmt.Errorf("failed to get backup destinations: %w", result.Error)
 	}

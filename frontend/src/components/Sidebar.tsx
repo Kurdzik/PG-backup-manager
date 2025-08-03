@@ -18,7 +18,7 @@ import {
   IconCloud, 
   IconLogout,
   IconShield,
-  IconActivity,
+  IconCalendarTime,
   IconServer,
   IconFolder,
   IconChevronLeft,
@@ -62,6 +62,11 @@ const mainItems: MainItemType[] = [
       icon: <IconServer2  size={16} stroke={1.5} />, 
       label: "Backups", 
       route: "/ui/backups",
+    },
+    { 
+      icon: <IconCalendarTime  size={16} stroke={1.5} />, 
+      label: "Backup Schedules", 
+      route: "/ui/schedules",
     },
 ];
 
@@ -212,8 +217,8 @@ export const SidebarComponent = () => {
     <Box 
       className={classes.sidebarContainer}
       style={{ 
-        width: collapsed ? '80px' : '280px',
-        transition: 'width 0.2s ease'
+        width: collapsed ? '60px' : '280px',
+        transition: 'width 0.1s ease'
       }}
     >
       {/* Header */}

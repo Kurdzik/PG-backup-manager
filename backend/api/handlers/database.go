@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"pg_bckup_mgr/auth"
 	"pg_bckup_mgr/db"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -109,18 +108,11 @@ func ListConnections(conn *gorm.DB) gin.HandlerFunc {
 
 func UpdateConnection(conn *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+
 		connectionId := c.Query("connection_id")
-		id, err := strconv.Atoi(connectionId)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"status": "invalid connection ID",
-				"error":  err.Error(),
-			})
-			return
-		}
 
 		var req UpdateConnectionRequest
-		err = c.ShouldBindJSON(&req)
+		err := c.ShouldBindJSON(&req)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"status": "validation error",
@@ -129,7 +121,7 @@ func UpdateConnection(conn *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		connection, err := db.GetCredentialsById(conn, id)
+		connection, err := db.GetCredentialsById(conn, connectionId)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status": "connection not found",
@@ -182,16 +174,8 @@ func UpdateConnection(conn *gorm.DB) gin.HandlerFunc {
 func DeleteConnection(conn *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		connectionId := c.Query("connection_id")
-		id, err := strconv.Atoi(connectionId)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"status": "invalid connection ID",
-				"error":  err.Error(),
-			})
-			return
-		}
 
-		err = db.DeleteCredentialsById(conn, id)
+		err := db.DeleteCredentialsById(conn, connectionId)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status": "failed to delete connection",

@@ -3,10 +3,9 @@ package handlers
 import (
 	"log"
 	"net/http"
-	"strconv"
 
 	"pg_bckup_mgr/auth"
-	bck "pg_bckup_mgr/backup-manager"
+	backup_manager "pg_bckup_mgr/backup-manager"
 	"pg_bckup_mgr/db"
 
 	"github.com/gin-gonic/gin"
@@ -14,12 +13,12 @@ import (
 )
 
 type CreateBackupRequest struct {
-	DatabaseId  int    `json:"database_id"`
+	DatabaseId  string `json:"database_id"`
 	Destination string `json:"backup_destination"`
 }
 
 type RestoreFromBackupRequest struct {
-	DatabaseId  int    `json:"database_id"`
+	DatabaseId  string `json:"database_id"`
 	Destination string `json:"backup_destination"`
 	Filename    string `json:"backup_filename"`
 }
@@ -39,7 +38,7 @@ func CreateBackup(conn *gorm.DB) gin.HandlerFunc {
 			})
 			return
 		}
-		log.Printf("CreateBackup request: DatabaseId=%d, Destination=%s", r.DatabaseId, r.Destination)
+		log.Printf("CreateBackup request: DatabaseId=%s, Destination=%s", r.DatabaseId, r.Destination)
 
 		creds, err := db.GetCredentialsById(conn, r.DatabaseId)
 		if err != nil {
@@ -67,7 +66,7 @@ func CreateBackup(conn *gorm.DB) gin.HandlerFunc {
 		}
 
 		decryptedPassword, _ := auth.DecryptPassword(creds.PostgresPassword)
-		bckupManager := bck.BackupManager{
+		bckupManager := backup_manager.BackupManager{
 			Host:              creds.PostgresHost,
 			Port:              creds.PostgresPort,
 			DBName:            creds.PostgresDBName,
@@ -77,7 +76,7 @@ func CreateBackup(conn *gorm.DB) gin.HandlerFunc {
 		}
 		log.Printf("BackupManager initialized for %s@%s:%s/%s", creds.PostgresUser, creds.PostgresHost, creds.PostgresPort, creds.PostgresDBName)
 
-		err = bckupManager.CreateBackup(bck.BackupDestination(r.Destination))
+		err = bckupManager.CreateBackup(backup_manager.BackupDestination(r.Destination))
 		if err != nil {
 			log.Printf("Error creating backup: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -100,9 +99,9 @@ func ListBackups(conn *gorm.DB) gin.HandlerFunc {
 
 		var destination *db.Destination
 
-		databaseId, _ := strconv.Atoi(c.Query("database_id"))
+		databaseId := c.Query("database_id")
 		backupDestination := c.Query("backup_destination")
-		log.Printf("ListBackups request: DatabaseId=%d, Destination=%s", databaseId, backupDestination)
+		log.Printf("ListBackups request: DatabaseId=%s, Destination=%s", databaseId, backupDestination)
 
 		creds, err := db.GetCredentialsById(conn, databaseId)
 		if err != nil {
@@ -129,7 +128,7 @@ func ListBackups(conn *gorm.DB) gin.HandlerFunc {
 			log.Printf("S3 destination configured: %s", dest.Name)
 		}
 
-		bckupManager := bck.BackupManager{
+		bckupManager := backup_manager.BackupManager{
 			Host:              creds.PostgresHost,
 			Port:              creds.PostgresPort,
 			DBName:            creds.PostgresDBName,
@@ -139,7 +138,7 @@ func ListBackups(conn *gorm.DB) gin.HandlerFunc {
 		}
 		log.Printf("BackupManager initialized for listing backups")
 
-		files := bckupManager.ListAvaiableBackups(bck.BackupDestination(backupDestination))
+		files := bckupManager.ListAvaiableBackups(backup_manager.BackupDestination(backupDestination))
 		log.Printf("Found %d backup files", len(files))
 
 		c.JSON(http.StatusOK, gin.H{
@@ -164,7 +163,7 @@ func RestoreFromBackup(conn *gorm.DB) gin.HandlerFunc {
 			})
 			return
 		}
-		log.Printf("RestoreFromBackup request: DatabaseId=%d, Destination=%s, Filename=%s", r.DatabaseId, r.Destination, r.Filename)
+		log.Printf("RestoreFromBackup request: DatabaseId=%s, Destination=%s, Filename=%s", r.DatabaseId, r.Destination, r.Filename)
 
 		creds, err := db.GetCredentialsById(conn, r.DatabaseId)
 		if err != nil {
@@ -192,7 +191,7 @@ func RestoreFromBackup(conn *gorm.DB) gin.HandlerFunc {
 		}
 
 		decryptedPassword, _ := auth.DecryptPassword(creds.PostgresPassword)
-		bckupManager := bck.BackupManager{
+		bckupManager := backup_manager.BackupManager{
 			Host:              creds.PostgresHost,
 			Port:              creds.PostgresPort,
 			DBName:            creds.PostgresDBName,
@@ -202,7 +201,7 @@ func RestoreFromBackup(conn *gorm.DB) gin.HandlerFunc {
 		}
 		log.Printf("BackupManager initialized for restore from %s", r.Destination)
 
-		err = bckupManager.RestoreFromBackup(bck.BackupDestination(r.Destination), r.Filename)
+		err = bckupManager.RestoreFromBackup(backup_manager.BackupDestination(r.Destination), r.Filename)
 		if err != nil {
 			log.Printf("Error restoring from backup: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -225,14 +224,7 @@ func DeleteBackup(conn *gorm.DB) gin.HandlerFunc {
 
 		var destination *db.Destination
 
-		databaseId, err := strconv.Atoi(c.Query("database_id"))
-		if err != nil {
-			log.Printf("Error parsing database_id in DeleteBackup: %v", err)
-			c.JSON(http.StatusBadRequest, gin.H{
-				"status": "Invalid database_id parameter",
-			})
-			return
-		}
+		databaseId := c.Query("database_id")
 
 		backupDestination := c.Query("destination")
 		if backupDestination == "" {
@@ -252,7 +244,7 @@ func DeleteBackup(conn *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		log.Printf("DeleteBackup request: DatabaseId=%d, Destination=%s, Filename=%s", databaseId, backupDestination, filename)
+		log.Printf("DeleteBackup request: DatabaseId=%s, Destination=%s, Filename=%s", databaseId, backupDestination, filename)
 
 		creds, err := db.GetCredentialsById(conn, databaseId)
 		if err != nil {
@@ -280,7 +272,7 @@ func DeleteBackup(conn *gorm.DB) gin.HandlerFunc {
 		}
 
 		decryptedPassword, _ := auth.DecryptPassword(creds.PostgresPassword)
-		bckupManager := bck.BackupManager{
+		bckupManager := backup_manager.BackupManager{
 			Host:              creds.PostgresHost,
 			Port:              creds.PostgresPort,
 			DBName:            creds.PostgresDBName,
@@ -290,7 +282,7 @@ func DeleteBackup(conn *gorm.DB) gin.HandlerFunc {
 		}
 		log.Printf("BackupManager initialized for delete from %s", backupDestination)
 
-		err = bckupManager.DeleteBackup(bck.BackupDestination(backupDestination), filename)
+		err = bckupManager.DeleteBackup(backup_manager.BackupDestination(backupDestination), filename)
 		if err != nil {
 			log.Printf("Error deleting backup: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{

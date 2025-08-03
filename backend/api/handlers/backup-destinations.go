@@ -3,7 +3,7 @@ package handlers
 import (
 	"log"
 	"net/http"
-	bck "pg_bckup_mgr/backup-manager"
+	backup_manager "pg_bckup_mgr/backup-manager"
 	"pg_bckup_mgr/db"
 	"strconv"
 
@@ -68,7 +68,7 @@ func CreateBackupDestination(conn *gorm.DB) gin.HandlerFunc {
 		}
 
 		if testFlag == "true" {
-			S3Client, err := bck.NewS3Client(e.Name,
+			S3Client, err := backup_manager.NewS3Client(e.Name,
 				e.EndpointURL,
 				e.Region,
 				e.BucketName,
