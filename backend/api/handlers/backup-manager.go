@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 
-	"pg_bckup_mgr/auth"
 	backup_manager "pg_bckup_mgr/backup-manager"
 	"pg_bckup_mgr/db"
 
@@ -65,13 +64,12 @@ func CreateBackup(conn *gorm.DB) gin.HandlerFunc {
 			log.Printf("S3 destination configured: %s", dest.Name)
 		}
 
-		decryptedPassword, _ := auth.DecryptPassword(creds.PostgresPassword)
 		bckupManager := backup_manager.BackupManager{
 			Host:              creds.PostgresHost,
 			Port:              creds.PostgresPort,
 			DBName:            creds.PostgresDBName,
 			User:              creds.PostgresUser,
-			Password:          decryptedPassword,
+			Password:          creds.PostgresPassword,
 			BackupDestination: destination,
 		}
 		log.Printf("BackupManager initialized for %s@%s:%s/%s", creds.PostgresUser, creds.PostgresHost, creds.PostgresPort, creds.PostgresDBName)
@@ -190,13 +188,12 @@ func RestoreFromBackup(conn *gorm.DB) gin.HandlerFunc {
 			log.Printf("S3 destination configured: %s", dest.Name)
 		}
 
-		decryptedPassword, _ := auth.DecryptPassword(creds.PostgresPassword)
 		bckupManager := backup_manager.BackupManager{
 			Host:              creds.PostgresHost,
 			Port:              creds.PostgresPort,
 			DBName:            creds.PostgresDBName,
 			User:              creds.PostgresUser,
-			Password:          decryptedPassword,
+			Password:          creds.PostgresPassword,
 			BackupDestination: destination,
 		}
 		log.Printf("BackupManager initialized for restore from %s", r.Destination)
@@ -271,13 +268,12 @@ func DeleteBackup(conn *gorm.DB) gin.HandlerFunc {
 			log.Printf("S3 destination configured: %s", dest.Name)
 		}
 
-		decryptedPassword, _ := auth.DecryptPassword(creds.PostgresPassword)
 		bckupManager := backup_manager.BackupManager{
 			Host:              creds.PostgresHost,
 			Port:              creds.PostgresPort,
 			DBName:            creds.PostgresDBName,
 			User:              creds.PostgresUser,
-			Password:          decryptedPassword,
+			Password:          creds.PostgresPassword,
 			BackupDestination: destination,
 		}
 		log.Printf("BackupManager initialized for delete from %s", backupDestination)

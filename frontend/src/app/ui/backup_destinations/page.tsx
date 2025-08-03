@@ -481,7 +481,7 @@ export default function S3BackupDestinations() {
             >
               Refresh
             </Button>
-            <Badge variant="light" size="lg">
+            <Badge variant="outline" radius={"sm"} size="md">
               {destinations.length} destination{destinations.length !== 1 ? 's' : ''}
             </Badge>
           </Group>

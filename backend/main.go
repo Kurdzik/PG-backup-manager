@@ -4,6 +4,7 @@ import (
 	"log"
 	"pg_bckup_mgr/api/handlers"
 	m "pg_bckup_mgr/api/middleware"
+	backup_manager "pg_bckup_mgr/backup-manager"
 	"pg_bckup_mgr/db"
 
 	"github.com/gin-gonic/gin"
@@ -30,6 +31,10 @@ func main() {
 	if err != nil {
 		log.Panicln("Unable to connect to the database")
 	}
+
+	// Register all existing backup schedules at startup
+	backup_manager.RegisterBackupSchedules(dbConn)
+	log.Println("Backup schedules registered successfully!")
 
 	api.GET("/healthcheck", handlers.Healthcheck())
 

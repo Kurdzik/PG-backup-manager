@@ -72,6 +72,9 @@ func CreateSchedule(conn *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		// Register all schedules with the cron scheduler
+		backup_manager.RestartBackupScheduler(conn)
+
 		log.Println("Schedule created successfully")
 		c.JSON(http.StatusCreated, gin.H{
 			"status": "Schedule created successfully",
@@ -164,6 +167,9 @@ func UpdateSchedule(conn *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		// Re-register all schedules with the cron scheduler
+		backup_manager.RestartBackupScheduler(conn)
+
 		log.Printf("Schedule %s updated successfully", scheduleID)
 		c.JSON(http.StatusOK, gin.H{
 			"status": "Schedule updated successfully",
@@ -202,6 +208,9 @@ func DeleteSchedule(conn *gorm.DB) gin.HandlerFunc {
 			})
 			return
 		}
+
+		// Re-register all schedules with the cron scheduler after deletion
+		backup_manager.RestartBackupScheduler(conn)
 
 		log.Printf("Schedule %s deleted successfully", scheduleID)
 		c.JSON(http.StatusOK, gin.H{
@@ -351,6 +360,9 @@ func EnableSchedule(conn *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		// Re-register all schedules with the cron scheduler after enabling
+		backup_manager.RestartBackupScheduler(conn)
+
 		log.Printf("Schedule %s enabled successfully", scheduleID)
 		c.JSON(http.StatusOK, gin.H{
 			"status": "Schedule enabled successfully",
@@ -389,6 +401,9 @@ func DisableSchedule(conn *gorm.DB) gin.HandlerFunc {
 			})
 			return
 		}
+
+		// Re-register all schedules with the cron scheduler after disabling
+		backup_manager.RestartBackupScheduler(conn)
 
 		log.Printf("Schedule %s disabled successfully", scheduleID)
 		c.JSON(http.StatusOK, gin.H{

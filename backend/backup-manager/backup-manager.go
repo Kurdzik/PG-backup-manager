@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"pg_bckup_mgr/auth"
 	"time"
 
 	"gorm.io/driver/postgres"
@@ -22,15 +23,17 @@ func (b BackupManager) createPgDumpBackup(outputPath string) error {
 		"-Fc",
 		"-f", outputPath,
 	)
+	decryptedPassword, _ := auth.DecryptPassword(b.Password)
 	cmd.Env = append(os.Environ(),
-		fmt.Sprintf("PGPASSWORD=%s", b.Password))
+		fmt.Sprintf("PGPASSWORD=%s", decryptedPassword))
 
 	return cmd.Run()
 }
 
 func (b BackupManager) Connect() (*gorm.DB, error) {
+	decryptedPassword, _ := auth.DecryptPassword(b.Password)
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-		b.Host, b.User, b.Password, b.DBName, b.Port)
+		b.Host, b.User, decryptedPassword, b.DBName, b.Port)
 
 	conn, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -121,8 +124,9 @@ func (b BackupManager) RestoreFromBackup(destination BackupDestination, filename
 			backupPath,
 		)
 
+		decryptedPassword, _ := auth.DecryptPassword(b.Password)
 		cmd.Env = append(os.Environ(),
-			fmt.Sprintf("PGPASSWORD=%s", b.Password))
+			fmt.Sprintf("PGPASSWORD=%s", decryptedPassword))
 
 		if err := cmd.Run(); err != nil {
 			log.Printf("Error restoring backup: %v", err)
@@ -191,8 +195,9 @@ func (b BackupManager) RestoreFromBackup(destination BackupDestination, filename
 			tempBackupPath,
 		)
 
+		decryptedPassword, _ := auth.DecryptPassword(b.Password)
 		cmd.Env = append(os.Environ(),
-			fmt.Sprintf("PGPASSWORD=%s", b.Password))
+			fmt.Sprintf("PGPASSWORD=%s", decryptedPassword))
 
 		if err := cmd.Run(); err != nil {
 			log.Printf("Error restoring backup: %v", err)

@@ -482,8 +482,8 @@ export default function BackupScheduleDashboard() {
       </Table.Td>
       <Table.Td>
         <Badge 
-          variant={schedule.enabled ? "filled" : "outline"} 
-          color={schedule.enabled ? "green" : "gray"}
+          variant={schedule.enabled ? "outline" : "outline"} 
+          color={schedule.enabled ? "success" : "slate"}
           size="sm"
           radius="sm"
         >
@@ -511,7 +511,7 @@ export default function BackupScheduleDashboard() {
           <Tooltip label={schedule.enabled ? "Disable" : "Enable"}>
             <ActionIcon
               variant="outline"
-              color={schedule.enabled ? "orange" : "green"}
+              color={schedule.enabled ? "warning" : "success"}
               onClick={() => handleToggleEnabled(schedule.id, !schedule.enabled)}
               aria-label={`${schedule.enabled ? 'Disable' : 'Enable'} schedule`}
             >
@@ -527,7 +527,7 @@ export default function BackupScheduleDashboard() {
           </ActionIcon>
           <ActionIcon
             variant="outline"
-            color="red"
+            color="error"
             onClick={() => handleDelete(schedule.id)}
             aria-label="Delete schedule"
           >
@@ -565,7 +565,7 @@ export default function BackupScheduleDashboard() {
       <SimpleGrid cols={{ base: 2, sm: 3, lg: 5 }} spacing="lg" mb="xl">
         <Card shadow="sm" padding="lg" radius="md" withBorder>
           <Flex align="center" gap="md">
-            <IconActivity size={24} color="#495057" />
+            <IconActivity size={24} color="grey" />
             <Box>
               <Text size="lg" fw={600}>{stats.total}</Text>
               <Text size="sm" c="dimmed">Total Schedules</Text>
@@ -575,7 +575,7 @@ export default function BackupScheduleDashboard() {
 
         <Card shadow="sm" padding="lg" radius="md" withBorder>
           <Flex align="center" gap="md">
-            <IconCheckbox size={24} color="#51cf66" />
+            <IconCheckbox size={24} color="green" />
             <Box>
               <Text size="lg" fw={600}>{stats.enabled}</Text>
               <Text size="sm" c="dimmed">Enabled</Text>
@@ -585,7 +585,7 @@ export default function BackupScheduleDashboard() {
 
         <Card shadow="sm" padding="lg" radius="md" withBorder>
           <Flex align="center" gap="md">
-            <IconX size={24} color="#adb5bd" />
+            <IconX size={24} color="grey" />
             <Box>
               <Text size="lg" fw={600}>{stats.disabled}</Text>
               <Text size="sm" c="dimmed">Disabled</Text>
@@ -595,7 +595,7 @@ export default function BackupScheduleDashboard() {
 
         <Card shadow="sm" padding="lg" radius="md" withBorder>
           <Flex align="center" gap="md">
-            <IconHistory size={24} color="#339af0" />
+            <IconHistory size={24} color="grey"/>
             <Box>
               <Text size="lg" fw={600}>{stats.recentRuns}</Text>
               <Text size="sm" c="dimmed">Ran Today</Text>
@@ -605,7 +605,7 @@ export default function BackupScheduleDashboard() {
 
         <Card shadow="sm" padding="lg" radius="md" withBorder>
           <Flex align="center" gap="md">
-            <IconClockHour3 size={24} color="#ffd43b" />
+            <IconClockHour3 size={24} color="grey"/>
             <Box>
               <Text size="lg" fw={600}>{stats.upcomingRuns}</Text>
               <Text size="sm" c="dimmed">Due Soon</Text>
@@ -626,7 +626,7 @@ export default function BackupScheduleDashboard() {
             >
               Refresh
             </Button>
-            <Badge variant="light" size="lg">
+            <Badge variant="outline" radius={"sm"} size="md">
               {schedules.length} schedule{schedules.length !== 1 ? 's' : ''}
             </Badge>
           </Group>

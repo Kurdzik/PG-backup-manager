@@ -59,7 +59,7 @@ interface DatabaseConnection {
 
 interface BackupDestination {
   id: number;
-  connection_id: number;
+  connection_id: string;
   name: string;
   endpoint_url: string;
   region: string;
@@ -385,7 +385,7 @@ export default function BackupManagerDashboard() {
     try {
       setCreateBackupLoading(true);
       const response: ApiResponse = await post("backup/create", {
-        database_id: parseInt(selectedDatabase),
+        database_id: selectedDatabase,
         backup_destination: backupDestination,
       });
       
@@ -406,7 +406,7 @@ export default function BackupManagerDashboard() {
     
     try {
       const response: ApiResponse = await post("backup/restore", {
-        database_id: parseInt(selectedDatabase),
+        database_id: selectedDatabase,
         backup_destination: backupDestination,
         backup_filename: selectedBackupFile,
       });

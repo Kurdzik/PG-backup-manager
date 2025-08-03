@@ -393,7 +393,7 @@ export default function DatabaseConnectionsDashboard() {
             >
               Refresh
             </Button>
-            <Badge variant="light" size="lg">
+            <Badge variant="outline" radius={"sm"} size="md">
               {connections.length} connection{connections.length !== 1 ? 's' : ''}
             </Badge>
           </Group>
