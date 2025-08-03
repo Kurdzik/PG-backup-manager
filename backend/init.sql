@@ -95,3 +95,22 @@ CREATE INDEX idx_backup_schedules_next_run ON backup_schedules(next_run);
 CREATE TRIGGER update_backup_schedules_updated_at 
     BEFORE UPDATE ON backup_schedules 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+
+
+-- Users table
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create index on username for faster lookups
+CREATE INDEX idx_users_username ON users(username);
+
+-- Update trigger for updated_at
+CREATE TRIGGER update_users_updated_at 
+    BEFORE UPDATE ON users 
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

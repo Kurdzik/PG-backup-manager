@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,55 +22,50 @@ func CORSMiddleware() gin.HandlerFunc {
 	}
 }
 
-// func AuthMiddleware() gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		var tokenHeader string
+func AuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
 
-// 		// Check for token in header first
-// 		tokenHeader = c.GetHeader("Token")
+		// Check for token in header first
+		authHeader := c.GetHeader("Authorization")
 
-// 		// If not in header, check query parameter (for WebSocket connections)
+		log.Println(authHeader)
 
-// 		if tokenHeader == "" {
-// 			tokenHeader = c.Query("token")
-// 		}
+		// 	if os.Getenv("APP_ENV") != "DEV" {
 
-// 		if os.Getenv("APP_ENV") != "DEV" {
+		// 		if tokenHeader == "" {
+		// 			log.Printf("JWT token not provided\n")
+		// 			c.JSON(401, gin.H{"error": "JWT token not provided"})
+		// 			c.Abort()
+		// 			return
+		// 		}
 
-// 			if tokenHeader == "" {
-// 				log.Printf("JWT token not provided\n")
-// 				c.JSON(401, gin.H{"error": "JWT token not provided"})
-// 				c.Abort()
-// 				return
-// 			}
+		// 		// Validate and parse token
+		// 		claims, err := auth.ParseJWT(tokenHeader)
+		// 		if err != nil {
+		// 			log.Printf("Invalid or expired JWT token: %v\n", err)
+		// 			c.JSON(401, gin.H{"error": "Invalid or expired JWT token"})
+		// 			c.Abort()
+		// 			return
+		// 		}
 
-// 			// Validate and parse token
-// 			claims, err := auth.ParseJWT(tokenHeader)
-// 			if err != nil {
-// 				log.Printf("Invalid or expired JWT token: %v\n", err)
-// 				c.JSON(401, gin.H{"error": "Invalid or expired JWT token"})
-// 				c.Abort()
-// 				return
-// 			}
+		// 		// Check if JWT Token is still valid
+		// 		if claims.Exp < time.Now().Unix() {
+		// 			log.Printf("Expired JWT token. Expired at: %v\n", claims.ExpiresAt)
+		// 			c.JSON(401, gin.H{"error": "Expired JWT token"})
+		// 			c.Abort()
+		// 			return
+		// 		}
 
-// 			// Check if JWT Token is still valid
-// 			if claims.Exp < time.Now().Unix() {
-// 				log.Printf("Expired JWT token. Expired at: %v\n", claims.ExpiresAt)
-// 				c.JSON(401, gin.H{"error": "Expired JWT token"})
-// 				c.Abort()
-// 				return
-// 			}
+		// 		c.Set("AuthorizedApps", strings.Join(claims.AllowedPaths, ","))
+		// 		c.Set("IsValid", true)
+		// 		c.Set("FullUserName", claims.UserFullName)
+		// 		c.Set("UserEmail", claims.Username)
+		// 		c.Set("ADGroups", strings.Join(claims.ADGroups, ","))
 
-// 			c.Set("AuthorizedApps", strings.Join(claims.AllowedPaths, ","))
-// 			c.Set("IsValid", true)
-// 			c.Set("FullUserName", claims.UserFullName)
-// 			c.Set("UserEmail", claims.Username)
-// 			c.Set("ADGroups", strings.Join(claims.ADGroups, ","))
+		// 	}
 
-// 		}
+		// 	c.Set("Content-Type", "application/json")
 
-// 		c.Set("Content-Type", "application/json")
-
-// 		c.Next()
-// 	}
-// }
+		c.Next()
+	}
+}

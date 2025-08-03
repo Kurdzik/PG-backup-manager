@@ -23,7 +23,7 @@ func (b BackupManager) createPgDumpBackup(outputPath string) error {
 		"-Fc",
 		"-f", outputPath,
 	)
-	decryptedPassword, _ := auth.DecryptPassword(b.Password)
+	decryptedPassword, _ := auth.DecryptString(b.Password)
 	cmd.Env = append(os.Environ(),
 		fmt.Sprintf("PGPASSWORD=%s", decryptedPassword))
 
@@ -31,7 +31,7 @@ func (b BackupManager) createPgDumpBackup(outputPath string) error {
 }
 
 func (b BackupManager) Connect() (*gorm.DB, error) {
-	decryptedPassword, _ := auth.DecryptPassword(b.Password)
+	decryptedPassword, _ := auth.DecryptString(b.Password)
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		b.Host, b.User, decryptedPassword, b.DBName, b.Port)
 
@@ -124,7 +124,7 @@ func (b BackupManager) RestoreFromBackup(destination BackupDestination, filename
 			backupPath,
 		)
 
-		decryptedPassword, _ := auth.DecryptPassword(b.Password)
+		decryptedPassword, _ := auth.DecryptString(b.Password)
 		cmd.Env = append(os.Environ(),
 			fmt.Sprintf("PGPASSWORD=%s", decryptedPassword))
 
@@ -195,7 +195,7 @@ func (b BackupManager) RestoreFromBackup(destination BackupDestination, filename
 			tempBackupPath,
 		)
 
-		decryptedPassword, _ := auth.DecryptPassword(b.Password)
+		decryptedPassword, _ := auth.DecryptString(b.Password)
 		cmd.Env = append(os.Environ(),
 			fmt.Sprintf("PGPASSWORD=%s", decryptedPassword))
 

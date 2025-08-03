@@ -40,7 +40,7 @@ func CreateConnection(conn *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		encryptedPassword, err := auth.EncryptPassword(req.PostgresPassword)
+		encryptedPassword, err := auth.EncryptString(req.PostgresPassword)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"status": "validation error",
@@ -144,7 +144,7 @@ func UpdateConnection(conn *gorm.DB) gin.HandlerFunc {
 		}
 
 		if req.PostgresPassword != "" {
-			encryptedPassword, err := auth.EncryptPassword(req.PostgresPassword)
+			encryptedPassword, err := auth.EncryptString(req.PostgresPassword)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{
 					"status": "validation error",

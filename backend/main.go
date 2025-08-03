@@ -38,6 +38,10 @@ func main() {
 
 	api.GET("/healthcheck", handlers.Healthcheck())
 
+	// User auth
+	api.POST("/user/create", handlers.CreateUser(dbConn))
+	api.POST("/user/login", handlers.LoginUser(dbConn))
+
 	// Backup endpoints
 	api.POST("/backup/create", handlers.CreateBackup(dbConn))
 	api.POST("/backup/restore", handlers.RestoreFromBackup(dbConn))

@@ -30,8 +30,8 @@ type S3Client struct {
 }
 
 func NewS3Client(connectionName, endpointURL, region, bucketName, accessKeyID, secretKeyID string, useSSL, verifySSL bool) (*S3Client, error) {
-	decryptedAccessKeyID, _ := auth.DecryptPassword(accessKeyID)
-	decryptedSecretKeyID, _ := auth.DecryptPassword(secretKeyID)
+	decryptedAccessKeyID, _ := auth.DecryptString(accessKeyID)
+	decryptedSecretKeyID, _ := auth.DecryptString(secretKeyID)
 	s3Client := &S3Client{
 		ConnectionName: connectionName,
 		EndpointURL:    endpointURL,

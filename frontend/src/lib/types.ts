@@ -40,3 +40,17 @@ export interface ApiResponse<T = any> {
     total_pages: number;
   };
 }
+
+export interface BackupSchedule {
+  id: number;
+  connection_id: number;
+  destination_id: number;
+  schedule: string;
+  enabled: boolean;
+  last_run?: string;
+  next_run?: string;
+  created_at: string;
+  updated_at: string;
+  connection?: DatabaseConnection;
+  destination?: BackupDestination;
+}

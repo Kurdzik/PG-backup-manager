@@ -10,7 +10,7 @@ import (
 )
 
 func TestConnection(conn Connection) bool {
-	decryptedPassword, _ := auth.DecryptPassword(conn.PostgresPassword)
+	decryptedPassword, _ := auth.DecryptString(conn.PostgresPassword)
 	dsn := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s",
 		conn.PostgresUser,
 		decryptedPassword,
@@ -113,4 +113,24 @@ func GetBackupDestinationByID(conn *gorm.DB, id string) (Destination, error) {
 		return destinations, fmt.Errorf("failed to get backup destinations: %w", result.Error)
 	}
 	return destinations, nil
+}
+
+func CreateUser(conn *gorm.DB, obj User) error {
+	result := conn.Create(&obj)
+	if result.Error != nil {
+		return fmt.Errorf("failed to create user: %w", result.Error)
+	}
+	return nil
+}
+
+func GetUserByName(conn *gorm.DB, username string) (User, error) {
+	var user User
+	result := conn.Where("username = ?", username).First(&user)
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return user, fmt.Errorf("user with username %s not found", username)
+		}
+		return user, fmt.Errorf("failed to get user: %w", result.Error)
+	}
+	return user, nil
 }

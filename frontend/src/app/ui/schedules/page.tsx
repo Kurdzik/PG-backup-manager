@@ -54,23 +54,10 @@ import {
 import { get, post, put, del } from "@/lib/backendRequests";
 import BottomRightNotification from "@/components/Notifications";
 import {NotificationData} from "@/components/Notifications";
-import {BackupDestination, DatabaseConnection, ApiResponse} from "@/lib/types"
+import {BackupDestination, DatabaseConnection, ApiResponse, BackupSchedule} from "@/lib/types"
 
 
 
-interface BackupSchedule {
-  id: number;
-  connection_id: number;
-  destination_id: number;
-  schedule: string;
-  enabled: boolean;
-  last_run?: string;
-  next_run?: string;
-  created_at: string;
-  updated_at: string;
-  connection?: DatabaseConnection;
-  destination?: BackupDestination;
-}
 
 interface ScheduleFormData {
   connection_id: string;

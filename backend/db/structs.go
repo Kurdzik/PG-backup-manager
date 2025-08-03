@@ -4,6 +4,18 @@ import (
 	"time"
 )
 
+type User struct {
+	ID        uint      `json:"id" gorm:"primaryKey;autoIncrement"`
+	Username  string    `json:"username" gorm:"type:varchar(255);not null;uniqueIndex"`
+	Password  string    `json:"password" gorm:"type:varchar(255);not null"`
+	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+}
+
+func (User) TableName() string {
+	return "users"
+}
+
 type Connection struct {
 	ID               uint      `json:"id" gorm:"primaryKey;autoIncrement"`
 	PostgresHost     string    `json:"postgres_host" gorm:"type:varchar(255);not null"`
@@ -14,12 +26,10 @@ type Connection struct {
 	CreatedAt        time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt        time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 
-	// Relationships
 	Destination     []Destination    `json:"destinations,omitempty" gorm:"foreignKey:ConnectionID;constraint:OnDelete:CASCADE,OnUpdate:CASCADE"`
 	BackupSchedules []BackupSchedule `json:"backup_schedules,omitempty" gorm:"foreignKey:ConnectionID;constraint:OnDelete:CASCADE,OnUpdate:CASCADE"`
 }
 
-// TableName overrides the table name used by Connection to `connections`
 func (Connection) TableName() string {
 	return "connections"
 }
@@ -39,12 +49,10 @@ type Destination struct {
 	CreatedAt       time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt       time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 
-	// Relationships
 	Connection      Connection       `json:"connection,omitempty" gorm:"foreignKey:ConnectionID;constraint:OnDelete:CASCADE,OnUpdate:CASCADE"`
 	BackupSchedules []BackupSchedule `json:"backup_schedules,omitempty" gorm:"foreignKey:DestinationID;constraint:OnDelete:CASCADE,OnUpdate:CASCADE"`
 }
 
-// TableName overrides the table name used by Destination to `destinations`
 func (Destination) TableName() string {
 	return "destinations"
 }
@@ -60,12 +68,10 @@ type BackupSchedule struct {
 	CreatedAt     time.Time  `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt     time.Time  `json:"updated_at" gorm:"autoUpdateTime"`
 
-	// Relationships
 	Connection  Connection  `json:"connection,omitempty" gorm:"foreignKey:ConnectionID;constraint:OnDelete:CASCADE,OnUpdate:CASCADE"`
 	Destination Destination `json:"destination,omitempty" gorm:"foreignKey:DestinationID;constraint:OnDelete:CASCADE,OnUpdate:CASCADE"`
 }
 
-// TableName overrides the table name used by BackupSchedule to `backup_schedules`
 func (BackupSchedule) TableName() string {
 	return "backup_schedules"
 }
