@@ -3,15 +3,17 @@ package db
 import (
 	"fmt"
 	"os"
+	"pg_bckup_mgr/auth"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 func TestConnection(conn Connection) bool {
+	decryptedPassword, _ := auth.DecryptPassword(conn.PostgresPassword)
 	dsn := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s",
 		conn.PostgresUser,
-		conn.PostgresPassword,
+		decryptedPassword,
 		conn.PostgresHost,
 		conn.PostgresPort,
 		conn.PostgresDBName)

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"pg_bckup_mgr/auth"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -29,13 +30,15 @@ type S3Client struct {
 }
 
 func NewS3Client(connectionName, endpointURL, region, bucketName, accessKeyID, secretKeyID string, useSSL, verifySSL bool) (*S3Client, error) {
+	decryptedAccessKeyID, _ := auth.DecryptPassword(accessKeyID)
+	decryptedSecretKeyID, _ := auth.DecryptPassword(secretKeyID)
 	s3Client := &S3Client{
 		ConnectionName: connectionName,
 		EndpointURL:    endpointURL,
 		Region:         region,
 		BucketName:     bucketName,
-		AccessKeyID:    accessKeyID,
-		SecretKeyID:    secretKeyID,
+		AccessKeyID:    decryptedAccessKeyID,
+		SecretKeyID:    decryptedSecretKeyID,
 		UseSSL:         useSSL,
 		VerifySSL:      verifySSL,
 	}

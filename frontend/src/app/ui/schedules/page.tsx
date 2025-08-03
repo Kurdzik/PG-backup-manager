@@ -51,34 +51,12 @@ import {
   IconHistory,
 } from '@tabler/icons-react';
 
-import { get, post, put, del } from "../../../lib/backendRequests";
+import { get, post, put, del } from "@/lib/backendRequests";
+import BottomRightNotification from "@/components/Notifications";
+import {NotificationData} from "@/components/Notifications";
+import {BackupDestination, DatabaseConnection} from "@/lib/types"
 
-interface Connection {
-  id: number;
-  postgres_db_name: string;
-  postgres_host: string;
-  postgres_port: string;
-  postgres_user: string;
-  postgres_password: string;
-  created_at: string;
-  updated_at: string;
-}
 
-interface BackupDestination {
-  id: number;
-  connection_id: number;
-  name: string;
-  endpoint_url: string;
-  region: string;
-  bucket_name: string;
-  access_key_id: string;
-  secret_access_key: string;
-  path_prefix: string;
-  use_ssl: boolean;
-  verify_ssl: boolean;
-  created_at: string;
-  updated_at: string;
-}
 
 interface BackupSchedule {
   id: number;
@@ -90,7 +68,7 @@ interface BackupSchedule {
   next_run?: string;
   created_at: string;
   updated_at: string;
-  connection?: Connection;
+  connection?: DatabaseConnection;
   destination?: BackupDestination;
 }
 
@@ -99,12 +77,6 @@ interface ScheduleFormData {
   destination_id: string;
   schedule: string;
   enabled: boolean;
-}
-
-interface NotificationData {
-  type: 'success' | 'error';
-  title: string;
-  message: string;
 }
 
 interface ApiResponse<T = any> {
@@ -123,70 +95,7 @@ interface ScheduleStats {
   upcomingRuns: number;
 }
 
-// Custom notification component for bottom-right positioning
-const BottomRightNotification = ({ 
-  notification, 
-  onClose 
-}: { 
-  notification: NotificationData | null; 
-  onClose: () => void; 
-}) => {
-  if (!notification) return null;
 
-  return (
-    <Box
-      style={{
-        position: 'fixed',
-        bottom: rem(24),
-        right: rem(24),
-        zIndex: 1000,
-        minWidth: rem(320),
-        maxWidth: rem(400),
-      }}
-    >
-      <Paper
-        shadow="lg"
-        p="md"
-        style={{
-          backgroundColor: notification.type === 'success' ? '#f8f9fa' : '#fff5f5',
-          borderLeft: `4px solid ${notification.type === 'success' ? '#51cf66' : '#ff6b6b'}`,
-        }}
-      >
-        <Flex align="flex-start" gap="sm">
-          <Box
-            style={{
-              color: notification.type === 'success' ? '#51cf66' : '#ff6b6b',
-              marginTop: rem(2),
-            }}
-          >
-            {notification.type === 'success' ? 
-              <IconCheck size={20} /> : 
-              <IconX size={20} />
-            }
-          </Box>
-          <Box style={{ flex: 1 }}>
-            <Text fw={600} size="sm" mb={4}>
-              {notification.title}
-            </Text>
-            <Text size="sm" c="dimmed">
-              {notification.message}
-            </Text>
-          </Box>
-          <ActionIcon
-            variant="subtle"
-            color="gray"
-            size="sm"
-            onClick={onClose}
-          >
-            <IconX size={16} />
-          </ActionIcon>
-        </Flex>
-      </Paper>
-    </Box>
-  );
-};
-
-// Common cron expressions for easy selection
 const COMMON_SCHEDULES = [
   { value: "0 2 * * *", label: "Daily at 2:00 AM" },
   { value: "0 2 * * 0", label: "Weekly on Sunday at 2:00 AM" },
@@ -199,7 +108,7 @@ const COMMON_SCHEDULES = [
 
 export default function BackupScheduleDashboard() {
   const [schedules, setSchedules] = useState<BackupSchedule[]>([]);
-  const [connections, setConnections] = useState<Connection[]>([]);
+  const [connections, setConnections] = useState<DatabaseConnection[]>([]);
   const [destinations, setDestinations] = useState<BackupDestination[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
@@ -240,7 +149,7 @@ export default function BackupScheduleDashboard() {
     try {
       setLoading(true);
       const [connectionsRes, destinationsRes, schedulesRes] = await Promise.all([
-        get("connections/list") as Promise<ApiResponse<Connection[]>>,
+        get("connections/list") as Promise<ApiResponse<DatabaseConnection[]>>,
         get("backup-destinations/s3/list") as Promise<ApiResponse<BackupDestination[]>>,
         get("schedules/list") as Promise<ApiResponse<BackupSchedule[]>>
       ]);
@@ -673,7 +582,7 @@ export default function BackupScheduleDashboard() {
             {editingSchedule ? "Edit Backup Schedule" : "Create New Backup Schedule"}
           </Text>
         }
-        position="right"
+        position="left"
         size="md"
         padding="xl"
       >
@@ -760,7 +669,7 @@ export default function BackupScheduleDashboard() {
             Confirm Deletion
           </Text>
         }
-        size="md"
+        size="xl"
         centered
       >
         <Stack gap="lg">

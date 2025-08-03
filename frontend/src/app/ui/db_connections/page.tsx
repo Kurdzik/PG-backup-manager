@@ -36,18 +36,11 @@ import {
   IconPlugConnected,
 } from '@tabler/icons-react';
 
-import { get, post, put, del } from "../../../lib/backendRequests";
+import { get, post, put, del } from "@/lib/backendRequests";
+import BottomRightNotification from "@/components/Notifications";
+import {NotificationData } from "@/components/Notifications";
+import {DatabaseConnection} from "@/lib/types"
 
-interface DatabaseConnection {
-  id: number;
-  postgres_host: string;
-  postgres_port: string;
-  postgres_db_name: string;
-  postgres_user: string;
-  postgres_password: string;
-  created_at: string;
-  updated_at: string;
-}
 
 interface ConnectionFormData {
   postgres_host: string;
@@ -57,81 +50,30 @@ interface ConnectionFormData {
   postgres_password: string;
 }
 
-interface NotificationData {
-  type: 'success' | 'error';
-  title: string;
-  message: string;
-}
+
+// interface ApiResponse<T = any> {
+//   data?: T;
+//   status?: string;
+//   count?: number;
+//   message?: string;
+// }
+
 
 interface ApiResponse<T = any> {
   data?: T;
+  msg?: string[];
   status?: string;
   count?: number;
-  message?: string;
+  pagination?: {
+    has_next: boolean;
+    has_prev: boolean;
+    limit: number;
+    page: number;
+    total: number;
+    total_pages: number;
+  };
 }
 
-// Custom notification component for bottom-right positioning
-const BottomRightNotification = ({ 
-  notification, 
-  onClose 
-}: { 
-  notification: NotificationData | null; 
-  onClose: () => void; 
-}) => {
-  if (!notification) return null;
-
-  return (
-    <Box
-      style={{
-        position: 'fixed',
-        bottom: rem(24),
-        right: rem(24),
-        zIndex: 1000,
-        minWidth: rem(320),
-        maxWidth: rem(400),
-      }}
-    >
-      <Paper
-        shadow="lg"
-        p="md"
-        style={{
-          backgroundColor: notification.type === 'success' ? '#f8f9fa' : '#fff5f5',
-          borderLeft: `4px solid ${notification.type === 'success' ? '#51cf66' : '#ff6b6b'}`,
-        }}
-      >
-        <Flex align="flex-start" gap="sm">
-          <Box
-            style={{
-              color: notification.type === 'success' ? '#51cf66' : '#ff6b6b',
-              marginTop: rem(2),
-            }}
-          >
-            {notification.type === 'success' ? 
-              <IconCheck size={20} /> : 
-              <IconX size={20} />
-            }
-          </Box>
-          <Box style={{ flex: 1 }}>
-            <Text fw={600} size="sm" mb={4}>
-              {notification.title}
-            </Text>
-            <Text size="sm" c="dimmed">
-              {notification.message}
-            </Text>
-          </Box>
-          <ActionIcon
-            variant="subtle"
-            color="gray"
-            size="sm"
-            onClick={onClose}
-          >
-            <IconX size={16} />
-          </ActionIcon>
-        </Flex>
-      </Paper>
-    </Box>
-  );
-};
 
 export default function DatabaseConnectionsDashboard() {
   const [connections, setConnections] = useState<DatabaseConnection[]>([]);
@@ -180,12 +122,12 @@ export default function DatabaseConnectionsDashboard() {
       const response: ApiResponse = await post("connections/create?test_connection=true", formData);
       
       // Check for successful response
-      if (response.message || response.status?.includes("successfully") || response.status?.includes("success")) {
+      if (response.status || response.status?.includes("successfully") || response.status?.includes("success")) {
         showNotification('success', 'Connection Test Successful', 
-          response.message || 'Database connection is valid and working correctly');
+          response.status || 'Database connection is valid and working correctly');
       } else {
         showNotification('error', 'Connection Test Failed', 
-          response.message || 'Unable to connect to database with provided credentials');
+          response.status || 'Unable to connect to database with provided credentials');
       }
     } catch (err: any) {
       // Handle different types of errors
@@ -215,8 +157,8 @@ export default function DatabaseConnectionsDashboard() {
         response = await post("connections/create", formData);
       }
       
-      if (response.status?.includes("successfully") || response.message) {
-        showNotification('success', 'Success', response.message || response.status || 'Operation completed successfully');
+      if (response.status?.includes("successfully") || response.status) {
+        showNotification('success', 'Success', response.status || response.status || 'Operation completed successfully');
         setDrawerOpened(false);
         resetForm();
         loadConnections();
@@ -439,7 +381,7 @@ export default function DatabaseConnectionsDashboard() {
             {editingConnection ? "Edit Connection" : "Create New Connection"}
           </Text>
         }
-        position="right"
+        position="left"
         size="md"
         padding="xl"
       >

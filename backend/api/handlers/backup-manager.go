@@ -140,8 +140,8 @@ func ListBackups(conn *gorm.DB) gin.HandlerFunc {
 		log.Printf("Found %d backup files", len(files))
 
 		c.JSON(http.StatusOK, gin.H{
-			"status": "OK",
-			"msg":    files,
+			"status":  "OK",
+			"payload": files,
 		})
 	}
 }
@@ -290,7 +290,6 @@ func DeleteBackup(conn *gorm.DB) gin.HandlerFunc {
 		log.Printf("Successfully deleted backup: %s", filename)
 		c.JSON(http.StatusOK, gin.H{
 			"status": "OK",
-			"msg":    "Backup deleted successfully",
 		})
 
 	}

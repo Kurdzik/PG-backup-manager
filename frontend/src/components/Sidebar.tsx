@@ -59,14 +59,14 @@ const mainItems: MainItemType[] = [
       route: "/ui/backup_destinations",
     },
     { 
-      icon: <IconServer2  size={16} stroke={1.5} />, 
-      label: "Backups", 
-      route: "/ui/backups",
-    },
-    { 
       icon: <IconCalendarTime  size={16} stroke={1.5} />, 
       label: "Backup Schedules", 
       route: "/ui/schedules",
+    },
+    { 
+      icon: <IconServer2  size={16} stroke={1.5} />, 
+      label: "Manage Backups", 
+      route: "/ui/backups",
     },
 ];
 

@@ -36,34 +36,11 @@ import {
   IconPlugConnected,
 } from '@tabler/icons-react';
 
-import { get, post, put, del } from "../../../lib/backendRequests";
+import { get, post, put, del } from "@/lib/backendRequests";
+import BottomRightNotification from "@/components/Notifications";
+import {NotificationData} from "@/components/Notifications";
+import {BackupDestination, DatabaseConnection} from "@/lib/types"
 
-interface Connection {
-  id: number;
-  postgres_db_name: string;
-  postgres_host: string;
-  postgres_port: string;
-  postgres_user: string;
-  postgres_password: string;
-  created_at: string;
-  updated_at: string;
-}
-
-interface BackupDestination {
-  id: number;
-  connection_id: number;
-  name: string;
-  endpoint_url: string;
-  region: string;
-  bucket_name: string;
-  access_key_id: string;
-  secret_access_key: string;
-  path_prefix: string;
-  use_ssl: boolean;
-  verify_ssl: boolean;
-  created_at: string;
-  updated_at: string;
-}
 
 interface DestinationFormData {
   connection_id: string;
@@ -78,11 +55,6 @@ interface DestinationFormData {
   verify_ssl: boolean;
 }
 
-interface NotificationData {
-  type: 'success' | 'error';
-  title: string;
-  message: string;
-}
 
 interface ApiResponse<T = any> {
   data?: T;
@@ -99,72 +71,10 @@ interface ApiResponse<T = any> {
   };
 }
 
-// Custom notification component for bottom-right positioning
-const BottomRightNotification = ({ 
-  notification, 
-  onClose 
-}: { 
-  notification: NotificationData | null; 
-  onClose: () => void; 
-}) => {
-  if (!notification) return null;
-
-  return (
-    <Box
-      style={{
-        position: 'fixed',
-        bottom: rem(24),
-        right: rem(24),
-        zIndex: 1000,
-        minWidth: rem(320),
-        maxWidth: rem(400),
-      }}
-    >
-      <Paper
-        shadow="lg"
-        p="md"
-        style={{
-          backgroundColor: notification.type === 'success' ? '#f8f9fa' : '#fff5f5',
-          borderLeft: `4px solid ${notification.type === 'success' ? '#51cf66' : '#ff6b6b'}`,
-        }}
-      >
-        <Flex align="flex-start" gap="sm">
-          <Box
-            style={{
-              color: notification.type === 'success' ? '#51cf66' : '#ff6b6b',
-              marginTop: rem(2),
-            }}
-          >
-            {notification.type === 'success' ? 
-              <IconCheck size={20} /> : 
-              <IconX size={20} />
-            }
-          </Box>
-          <Box style={{ flex: 1 }}>
-            <Text fw={600} size="sm" mb={4}>
-              {notification.title}
-            </Text>
-            <Text size="sm" c="dimmed">
-              {notification.message}
-            </Text>
-          </Box>
-          <ActionIcon
-            variant="subtle"
-            color="gray"
-            size="sm"
-            onClick={onClose}
-          >
-            <IconX size={16} />
-          </ActionIcon>
-        </Flex>
-      </Paper>
-    </Box>
-  );
-};
 
 export default function S3BackupDestinations() {
   const [destinations, setDestinations] = useState<BackupDestination[]>([]);
-  const [connections, setConnections] = useState<Connection[]>([]);
+  const [connections, setConnections] = useState<DatabaseConnection[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
   const [confirmModalOpened, setConfirmModalOpened] = useState<boolean>(false);
@@ -199,7 +109,7 @@ export default function S3BackupDestinations() {
     try {
       setLoading(true);
       const [connectionsRes, destinationsRes] = await Promise.all([
-        get("connections/list") as Promise<ApiResponse<Connection[]>>,
+        get("connections/list") as Promise<ApiResponse<DatabaseConnection[]>>,
         get("backup-destinations/s3/list") as Promise<ApiResponse<BackupDestination[]>>
       ]);
       
@@ -529,7 +439,7 @@ export default function S3BackupDestinations() {
             {editingDestination ? "Edit Backup Destination" : "Create New Backup Destination"}
           </Text>
         }
-        position="right"
+        position="left"
         size="md"
         padding="xl"
       >
@@ -664,7 +574,7 @@ export default function S3BackupDestinations() {
             Confirm Deletion
           </Text>
         }
-        size="md"
+        size="lg"
         centered
       >
         <Stack gap="lg">

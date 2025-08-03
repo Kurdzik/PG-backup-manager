@@ -43,35 +43,10 @@ import {
   IconArchive,
 } from '@tabler/icons-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-import { get, post, del } from "../../../lib/backendRequests";
-
-interface DatabaseConnection {
-  id: number;
-  postgres_host: string;
-  postgres_port: string;
-  postgres_db_name: string;
-  postgres_user: string;
-  postgres_password: string;
-  created_at: string;
-  updated_at: string;
-}
-
-interface BackupDestination {
-  id: number;
-  connection_id: string;
-  name: string;
-  endpoint_url: string;
-  region: string;
-  bucket_name: string;
-  access_key_id: string;
-  secret_access_key: string;
-  path_prefix: string;
-  use_ssl: boolean;
-  verify_ssl: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import BottomRightNotification from "@/components/Notifications";
+import {NotificationData} from "@/components/Notifications";
+import { get, post, put, del } from "@/lib/backendRequests";
+import {BackupDestination, DatabaseConnection} from "@/lib/types"
 
 interface BackupFile {
   filename: string;
@@ -86,15 +61,11 @@ interface BackupStats {
   backupsToday: number;
 }
 
-interface NotificationData {
-  type: 'success' | 'error';
-  title: string;
-  message: string;
-}
+
 
 interface ApiResponse<T = any> {
   data?: T;
-  msg?: string[];
+  payload?: string[];
   status?: string;
   count?: number;
   pagination?: {
@@ -113,71 +84,7 @@ interface ChartDataPoint {
   fullDate: Date;
 }
 
-// Custom notification component for bottom-right positioning
-const BottomRightNotification = ({ 
-  notification, 
-  onClose 
-}: { 
-  notification: NotificationData | null; 
-  onClose: () => void; 
-}) => {
-  if (!notification) return null;
 
-  return (
-    <Box
-      style={{
-        position: 'fixed',
-        bottom: rem(24),
-        right: rem(24),
-        zIndex: 1000,
-        minWidth: rem(320),
-        maxWidth: rem(400),
-      }}
-    >
-      <Paper
-        shadow="sm"
-        p="md"
-        radius="sm"
-        style={{
-          backgroundColor: notification.type === 'success' ? 'var(--mantine-color-neutral-0)' : 'var(--mantine-color-neutral-0)',
-          border: `1px solid ${notification.type === 'success' ? 'var(--mantine-color-success-6)' : 'var(--mantine-color-error-6)'}`,
-          borderLeft: `3px solid ${notification.type === 'success' ? 'var(--mantine-color-success-6)' : 'var(--mantine-color-error-6)'}`,
-        }}
-      >
-        <Flex align="flex-start" gap="sm">
-          <Box
-            style={{
-              color: notification.type === 'success' ? 'var(--mantine-color-success-6)' : 'var(--mantine-color-error-6)',
-              marginTop: rem(2),
-            }}
-          >
-            {notification.type === 'success' ? 
-              <IconCheck size={18} stroke={1.5} /> : 
-              <IconX size={18} stroke={1.5} />
-            }
-          </Box>
-          <Box style={{ flex: 1 }}>
-            <Text fw={500} size="sm" mb={4}>
-              {notification.title}
-            </Text>
-            <Text size="sm" c="dimmed">
-              {notification.message}
-            </Text>
-          </Box>
-          <ActionIcon
-            variant="subtle"
-            color="gray"
-            size="sm"
-            onClick={onClose}
-            radius="sm"
-          >
-            <IconX size={14} stroke={1.5} />
-          </ActionIcon>
-        </Flex>
-      </Paper>
-    </Box>
-  );
-};
 
 export default function BackupManagerDashboard() {
   const [connections, setConnections] = useState<DatabaseConnection[]>([]);
@@ -252,11 +159,6 @@ export default function BackupManagerDashboard() {
       const destinations = response.data || [];
       setBackupDestinations(destinations);
       
-      // Reset to local if current destination is not available for this connection
-      const destinationIds = destinations.map(d => d.id.toString());
-      if (backupDestination !== 'local' && !destinationIds.includes(backupDestination)) {
-        setBackupDestination('local');
-      }
     } catch (err) {
       showNotification('error', 'Error', 'Failed to load backup destinations');
       console.error("Error loading backup destinations:", err);
@@ -357,7 +259,7 @@ export default function BackupManagerDashboard() {
       setBackupsLoading(true);
       const response: ApiResponse = await get(`backup/list?database_id=${selectedDatabase}&backup_destination=${backupDestination}`);
       
-      const backupFiles: BackupFile[] = (response.msg || []).map(filename => ({
+      const backupFiles: BackupFile[] = (response.payload || []).map(filename => ({
         filename,
         timestamp: parseBackupTimestamp(filename),
       }));
@@ -794,7 +696,7 @@ export default function BackupManagerDashboard() {
             Restore Database
           </Text>
         }
-        size="md"
+        size="xl"
         centered
         radius="sm"
       >
@@ -844,7 +746,7 @@ export default function BackupManagerDashboard() {
             Delete Backup
           </Text>
         }
-        size="md"
+        size="lg"
         centered
       >
         <Stack gap="lg">

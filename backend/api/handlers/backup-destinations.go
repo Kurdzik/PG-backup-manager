@@ -3,6 +3,7 @@ package handlers
 import (
 	"log"
 	"net/http"
+	"pg_bckup_mgr/auth"
 	backup_manager "pg_bckup_mgr/backup-manager"
 	"pg_bckup_mgr/db"
 	"strconv"
@@ -24,6 +25,11 @@ func CreateBackupDestination(conn *gorm.DB) gin.HandlerFunc {
 			})
 			return
 		}
+
+		encryptedAccessKeyID, _ := auth.EncryptPassword(e.AccessKeyID)
+		e.AccessKeyID = encryptedAccessKeyID
+		encryptedSecretAccessKey, _ := auth.EncryptPassword(e.SecretAccessKey)
+		e.SecretAccessKey = encryptedSecretAccessKey
 
 		if e.ConnectionID == 0 {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -269,8 +275,8 @@ func UpdateBackupDestination(conn *gorm.DB) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"message": "Backup destination updated successfully",
-			"data":    existing,
+			"status": "Backup destination updated successfully",
+			"data":   existing,
 		})
 	}
 }
@@ -311,7 +317,7 @@ func DeleteBackupDestination(conn *gorm.DB) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"message": "Backup destination deleted successfully",
+			"status": "Backup destination deleted successfully",
 		})
 	}
 }

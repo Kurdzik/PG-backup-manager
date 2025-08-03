@@ -96,8 +96,8 @@ func (b BackupManager) RestoreFromBackup(destination BackupDestination, filename
 	switch destination {
 	case BackupFilesystem:
 		log.Printf("Restoring database from backup: %s", filename)
-
-		backupPath := filepath.Join(LOCAL_BACKUP_DIR, b.DBName, filename)
+		backupDirName := fmt.Sprintf("%s-%s-%s", b.DBName, b.Host, b.User)
+		backupPath := filepath.Join(LOCAL_BACKUP_DIR, backupDirName, filename)
 
 		if _, err := os.Stat(backupPath); os.IsNotExist(err) {
 			log.Printf("Backup file does not exist: %s", backupPath)
