@@ -320,13 +320,13 @@ export default function DatabaseConnectionsDashboard() {
         <Flex align="center" gap="sm">
           <IconServer size={18} color="#495057" />
           <Box>
-            <Text fw={500} size="sm">{connection.postgres_db_name}</Text>
+            <Text fw={500} size="md">{connection.postgres_db_name}</Text>
             <Text size="xs" c="dimmed">{connection.postgres_host}:{connection.postgres_port}</Text>
           </Box>
         </Flex>
       </Table.Td>
       <Table.Td>
-        <Badge variant="light" color="blue" size="sm">
+        <Badge variant="outline" radius={"sm"} size="sm">
           {connection.postgres_user}
         </Badge>
       </Table.Td>
@@ -339,16 +339,15 @@ export default function DatabaseConnectionsDashboard() {
       <Table.Td>
         <Group gap="xs">
           <ActionIcon
-            variant="subtle"
-            color="blue"
+            variant="outline"
             onClick={() => openEditDrawer(connection)}
             aria-label={`Edit connection ${connection.postgres_db_name}`}
           >
             <IconEdit size={16} />
           </ActionIcon>
           <ActionIcon
-            variant="subtle"
-            color="red"
+            variant="outline"
+            color="error"
             onClick={() => handleDelete(connection.id, connection.postgres_db_name)}
             aria-label={`Delete connection ${connection.postgres_db_name}`}
           >

@@ -17,5 +17,5 @@ type BackupManager struct {
 	DBName            string
 	User              string
 	Password          string
-	BackupDestination *db.Destinations
+	BackupDestination *db.Destination
 }

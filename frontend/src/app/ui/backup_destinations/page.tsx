@@ -50,7 +50,7 @@ interface Connection {
 }
 
 interface BackupDestination {
-  destination_id: number;
+  id: number;
   connection_id: number;
   name: string;
   endpoint_url: string;
@@ -262,7 +262,7 @@ export default function S3BackupDestinations() {
       };
       
       if (editingDestination) {
-        response = await put(`backup-destinations/s3/update?destination_id=${editingDestination.destination_id}`, payload);
+        response = await put(`backup-destinations/s3/update?destination_id=${editingDestination.id}`, payload);
       } else {
         response = await post("backup-destinations/s3/create", payload);
       }
@@ -387,12 +387,12 @@ export default function S3BackupDestinations() {
   }));
 
   const rows = destinations.map((destination: BackupDestination) => (
-    <Table.Tr key={destination.destination_id}>
+    <Table.Tr key={destination.id}>
       <Table.Td>
         <Flex align="center" gap="sm">
           <IconCloud size={18} color="#495057" />
           <Box>
-            <Text fw={500} size="sm">{destination.name}</Text>
+            <Text fw={500} size="md">{destination.name}</Text>
             <Text size="xs" c="dimmed">{destination.bucket_name}</Text>
           </Box>
         </Flex>
@@ -413,10 +413,10 @@ export default function S3BackupDestinations() {
       </Table.Td>
       <Table.Td>
         <Group gap="xs">
-          <Badge color={destination.use_ssl ? 'green' : 'red'} variant="light" size="sm">
+          <Badge variant="outline" size="sm" radius={"sm"}>
             SSL: {destination.use_ssl ? 'On' : 'Off'}
           </Badge>
-          <Badge color={destination.verify_ssl ? 'blue' : 'orange'} variant="light" size="sm">
+          <Badge variant="outline" size="sm" radius={"sm"}>
             Verify: {destination.verify_ssl ? 'On' : 'Off'}
           </Badge>
         </Group>
@@ -427,17 +427,16 @@ export default function S3BackupDestinations() {
       <Table.Td>
         <Group gap="xs">
           <ActionIcon
-            variant="subtle"
-            color="blue"
+            variant="outline"
             onClick={() => openEditDrawer(destination)}
             aria-label={`Edit destination ${destination.name}`}
           >
             <IconEdit size={16} />
           </ActionIcon>
           <ActionIcon
-            variant="subtle"
-            color="red"
-            onClick={() => handleDelete(destination.destination_id, destination.name)}
+            variant="outline"
+            color="error"
+            onClick={() => handleDelete(destination.id, destination.name)}
             aria-label={`Delete destination ${destination.name}`}
           >
             <IconTrash size={16} />

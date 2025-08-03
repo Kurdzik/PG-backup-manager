@@ -49,7 +49,7 @@ func CreateConnection(conn *gorm.DB) gin.HandlerFunc {
 			})
 			return
 		}
-		connection := db.Connections{
+		connection := db.Connection{
 			PostgresHost:     req.PostgresHost,
 			PostgresPort:     req.PostgresPort,
 			PostgresDBName:   req.PostgresDBName,

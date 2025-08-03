@@ -28,7 +28,7 @@ import {
 import {
   IconDatabase,
   IconDownload,
-  IconRestore,
+  IconHistory,
   IconTrash,
   IconRefresh,
   IconCheck,
@@ -58,7 +58,7 @@ interface DatabaseConnection {
 }
 
 interface BackupDestination {
-  destination_id: number;
+  id: number;
   connection_id: number;
   name: string;
   endpoint_url: string;
@@ -183,7 +183,7 @@ export default function BackupManagerDashboard() {
   const [connections, setConnections] = useState<DatabaseConnection[]>([]);
   const [selectedDatabase, setSelectedDatabase] = useState<string | null>(null);
   const [backupDestinations, setBackupDestinations] = useState<BackupDestination[]>([]);
-  const [backupDestination, setBackupDestination] = useState<string>('local');
+  const [backupDestination, setBackupDestination] = useState<string>("");
   const [backups, setBackups] = useState<BackupFile[]>([]);
   const [stats, setStats] = useState<BackupStats>({
     totalBackups: 0,
@@ -253,7 +253,7 @@ export default function BackupManagerDashboard() {
       setBackupDestinations(destinations);
       
       // Reset to local if current destination is not available for this connection
-      const destinationIds = destinations.map(d => d.destination_id.toString());
+      const destinationIds = destinations.map(d => d.id.toString());
       if (backupDestination !== 'local' && !destinationIds.includes(backupDestination)) {
         setBackupDestination('local');
       }
@@ -464,7 +464,7 @@ export default function BackupManagerDashboard() {
 
   const getDestinationDisplayName = (destinationValue: string): string => {
     if (destinationValue === 'local') return 'Local Storage';
-    const destination = backupDestinations.find(d => d.destination_id.toString() === destinationValue);
+    const destination = backupDestinations.find(d => d.id.toString() === destinationValue);
     return destination ? `${destination.name}` : destinationValue;
   };
 
@@ -498,7 +498,7 @@ export default function BackupManagerDashboard() {
   const destinationOptions = [
     { value: 'local', label: 'Local Storage' },
     ...backupDestinations.map(dest => ({
-      value: dest.destination_id.toString(),
+      value: dest.id.toString(),
       label: `${dest.name} (S3)`
     }))
   ];
@@ -530,24 +530,23 @@ export default function BackupManagerDashboard() {
       <Table.Td>
         <Group gap="xs">
           <ActionIcon
-            variant="subtle"
-            color="slate"
+            variant="outline"
             onClick={() => openRestoreModal(backup.filename)}
             aria-label={`Restore backup ${backup.filename}`}
             radius="sm"
             size="sm"
           >
-            <IconRestore size={14} stroke={1.5} />
+            <IconHistory size={16} stroke={1.5} />
           </ActionIcon>
           <ActionIcon
-            variant="subtle"
+            variant="outline"
             color="error"
             onClick={() => openDeleteModal(backup.filename)}
             aria-label={`Delete backup ${backup.filename}`}
             radius="sm"
             size="sm"
           >
-            <IconTrash size={14} stroke={1.5} />
+            <IconTrash size={16} stroke={1.5} />
           </ActionIcon>
         </Group>
       </Table.Td>

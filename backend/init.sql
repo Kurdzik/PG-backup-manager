@@ -1,3 +1,4 @@
+-- Connection table
 CREATE TABLE connections (
     id SERIAL PRIMARY KEY,
     postgres_host VARCHAR(255) NOT NULL,
@@ -26,6 +27,7 @@ CREATE TRIGGER update_connections_updated_at
     BEFORE UPDATE ON connections 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+-- Destination table
 CREATE TABLE destinations (
     id SERIAL PRIMARY KEY,
     connection_id INTEGER NOT NULL,
@@ -57,4 +59,39 @@ CREATE INDEX idx_destinations_connection_id ON destinations(connection_id);
 -- Update trigger for updated_at
 CREATE TRIGGER update_destinations_updated_at 
     BEFORE UPDATE ON destinations 
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Backup schedules table
+CREATE TABLE backup_schedules (
+    id SERIAL PRIMARY KEY,
+    connection_id INTEGER NOT NULL,
+    destination_id INTEGER NOT NULL,
+    schedule VARCHAR(255) NOT NULL, -- Cron expression or schedule string
+    enabled BOOLEAN DEFAULT TRUE,
+    last_run TIMESTAMP,
+    next_run TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(connection_id, destination_id), -- One schedule per connection-destination pair
+    CONSTRAINT fk_backup_schedules_connection 
+        FOREIGN KEY (connection_id) 
+        REFERENCES connections(id) 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_backup_schedules_destination 
+        FOREIGN KEY (destination_id) 
+        REFERENCES destinations(id) 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE
+);
+
+-- Create indexes on commonly queried fields
+CREATE INDEX idx_backup_schedules_connection_id ON backup_schedules(connection_id);
+CREATE INDEX idx_backup_schedules_destination_id ON backup_schedules(destination_id);
+CREATE INDEX idx_backup_schedules_enabled ON backup_schedules(enabled);
+CREATE INDEX idx_backup_schedules_next_run ON backup_schedules(next_run);
+
+-- Update trigger for updated_at
+CREATE TRIGGER update_backup_schedules_updated_at 
+    BEFORE UPDATE ON backup_schedules 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

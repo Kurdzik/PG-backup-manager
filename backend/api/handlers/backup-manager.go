@@ -28,7 +28,7 @@ func CreateBackup(conn *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.Println("CreateBackup handler called")
 
-		var destination *db.Destinations
+		var destination *db.Destination
 		var r CreateBackupRequest
 
 		err := c.ShouldBindJSON(&r)
@@ -98,7 +98,7 @@ func ListBackups(conn *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.Println("ListBackups handler called")
 
-		var destination *db.Destinations
+		var destination *db.Destination
 
 		databaseId, _ := strconv.Atoi(c.Query("database_id"))
 		backupDestination := c.Query("backup_destination")
@@ -153,7 +153,7 @@ func RestoreFromBackup(conn *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.Println("RestoreFromBackup handler called")
 
-		var destination *db.Destinations
+		var destination *db.Destination
 		var r RestoreFromBackupRequest
 
 		err := c.ShouldBindJSON(&r)
@@ -223,7 +223,7 @@ func DeleteBackup(conn *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.Println("DeleteBackup handler called")
 
-		var destination *db.Destinations
+		var destination *db.Destination
 
 		databaseId, err := strconv.Atoi(c.Query("database_id"))
 		if err != nil {

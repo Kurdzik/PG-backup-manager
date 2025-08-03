@@ -13,7 +13,7 @@ import (
 
 func CreateBackupDestination(conn *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var e db.Destinations
+		var e db.Destination
 
 		testFlag := c.Query("test_connection")
 
@@ -125,7 +125,7 @@ func CreateBackupDestination(conn *gorm.DB) gin.HandlerFunc {
 
 func ListAllBackupDestinations(conn *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var destinations []db.Destinations
+		var destinations []db.Destination
 
 		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 		limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
@@ -140,7 +140,7 @@ func ListAllBackupDestinations(conn *gorm.DB) gin.HandlerFunc {
 
 		offset := (page - 1) * limit
 
-		query := conn.Model(&db.Destinations{})
+		query := conn.Model(&db.Destination{})
 
 		// Filter by connection_id if provided
 		if connectionID != "" {
@@ -193,7 +193,7 @@ func UpdateBackupDestination(conn *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		var existing db.Destinations
+		var existing db.Destination
 		if err := conn.First(&existing, uint(id)).Error; err != nil {
 			if err == gorm.ErrRecordNotFound {
 				c.JSON(http.StatusNotFound, gin.H{
@@ -209,7 +209,7 @@ func UpdateBackupDestination(conn *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		var updates db.Destinations
+		var updates db.Destination
 		if err := c.ShouldBindJSON(&updates); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"status": "Invalid request body",
@@ -286,7 +286,7 @@ func DeleteBackupDestination(conn *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		var destination db.Destinations
+		var destination db.Destination
 		if err := conn.First(&destination, uint(id)).Error; err != nil {
 			if err == gorm.ErrRecordNotFound {
 				c.JSON(http.StatusNotFound, gin.H{

@@ -3,13 +3,12 @@ package db
 import (
 	"fmt"
 	"os"
-	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-func TestConnection(conn Connections) bool {
+func TestConnection(conn Connection) bool {
 	dsn := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s",
 		conn.PostgresUser,
 		conn.PostgresPassword,
@@ -46,7 +45,7 @@ func Connect() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	err = conn.AutoMigrate(&Connections{})
+	err = conn.AutoMigrate(&Connection{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to migrate database: %w", err)
 	}
@@ -54,7 +53,7 @@ func Connect() (*gorm.DB, error) {
 	return conn, nil
 }
 
-func AddCredentials(conn *gorm.DB, obj Connections) error {
+func AddCredentials(conn *gorm.DB, obj Connection) error {
 	result := conn.Create(&obj)
 	if result.Error != nil {
 		return fmt.Errorf("failed to create credentials: %w", result.Error)
@@ -62,8 +61,8 @@ func AddCredentials(conn *gorm.DB, obj Connections) error {
 	return nil
 }
 
-func GetCredentialsById(conn *gorm.DB, id int) (Connections, error) {
-	var connection Connections
+func GetCredentialsById(conn *gorm.DB, id int) (Connection, error) {
+	var connection Connection
 	result := conn.First(&connection, id)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
@@ -74,8 +73,8 @@ func GetCredentialsById(conn *gorm.DB, id int) (Connections, error) {
 	return connection, nil
 }
 
-func ListAllCredentials(conn *gorm.DB) ([]Connections, error) {
-	var connections []Connections
+func ListAllCredentials(conn *gorm.DB) ([]Connection, error) {
+	var connections []Connection
 	result := conn.Find(&connections)
 	if result.Error != nil {
 		return nil, fmt.Errorf("failed to list credentials: %w", result.Error)
@@ -84,7 +83,7 @@ func ListAllCredentials(conn *gorm.DB) ([]Connections, error) {
 }
 
 func DeleteCredentialsById(conn *gorm.DB, id int) error {
-	result := conn.Delete(&Connections{}, id)
+	result := conn.Delete(&Connection{}, id)
 	if result.Error != nil {
 		return fmt.Errorf("failed to delete credentials: %w", result.Error)
 	}
@@ -94,7 +93,7 @@ func DeleteCredentialsById(conn *gorm.DB, id int) error {
 	return nil
 }
 
-func UpdateCredentials(conn *gorm.DB, obj Connections) error {
+func UpdateCredentials(conn *gorm.DB, obj Connection) error {
 	result := conn.Save(&obj)
 	if result.Error != nil {
 		return fmt.Errorf("failed to update credentials: %w", result.Error)
@@ -102,24 +101,8 @@ func UpdateCredentials(conn *gorm.DB, obj Connections) error {
 	return nil
 }
 
-type Destinations struct {
-	ID              uint      `json:"destination_id" gorm:"primaryKey;autoIncrement"`
-	ConnectionID    uint      `json:"connection_id" gorm:"not null;index"`
-	Name            string    `json:"name" gorm:"type:varchar(255);not null;uniqueIndex"`
-	EndpointURL     string    `json:"endpoint_url" gorm:"type:varchar(500);not null"`
-	Region          string    `json:"region" gorm:"type:varchar(100)"`
-	BucketName      string    `json:"bucket_name" gorm:"type:varchar(255);not null"`
-	AccessKeyID     string    `json:"access_key_id" gorm:"type:varchar(255);not null"`
-	SecretAccessKey string    `json:"secret_access_key" gorm:"type:varchar(255);not null"`
-	PathPrefix      string    `json:"path_prefix" gorm:"type:varchar(500);default:''"`
-	UseSSL          bool      `json:"use_ssl" gorm:"default:true"`
-	VerifySSL       bool      `json:"verify_ssl" gorm:"default:true"`
-	CreatedAt       time.Time `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt       time.Time `json:"updated_at" gorm:"autoUpdateTime"`
-}
-
-func GetBackupDestinationByID(conn *gorm.DB, id string) (Destinations, error) {
-	var destinations Destinations
+func GetBackupDestinationByID(conn *gorm.DB, id string) (Destination, error) {
+	var destinations Destination
 	result := conn.First(&destinations, id)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
