@@ -24,7 +24,8 @@ import {
 } from "@tabler/icons-react";
 import React from "react";
 import Link from "next/link";
-import classes from "./Sidebar.module.css";
+import classes from "@/components/Sidebar.module.css";
+import { removeAuthCookie } from "@/lib/cookies";
 
 interface SidebarItemProps {
   icon: React.ReactNode;
@@ -177,7 +178,6 @@ export const SidebarComponent = () => {
   const [activeItem, setActiveItem] = React.useState("Database Connections");
   const [collapsed, setCollapsed] = React.useState(false);
 
-  // Load state from localStorage on mount
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       const savedActiveItem = localStorage.getItem("sidebar-active-item");
@@ -193,7 +193,6 @@ export const SidebarComponent = () => {
     }
   }, []);
 
-  // Save active item to localStorage
   const handleItemClick = (label: string) => {
     setActiveItem(label);
     if (typeof window !== "undefined") {
@@ -201,7 +200,16 @@ export const SidebarComponent = () => {
     }
   };
 
-  // Toggle collapsed state
+
+  const handleLogout = async () => {
+    try {
+      await removeAuthCookie();
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
+
   const toggleCollapsed = () => {
     const newCollapsed = !collapsed;
     setCollapsed(newCollapsed);
@@ -298,7 +306,7 @@ export const SidebarComponent = () => {
                 />
               ))}
             </Stack>
-          </Box>
+          </Box> 
         </Stack>
       </ScrollArea>
 
@@ -328,7 +336,13 @@ export const SidebarComponent = () => {
                 label={item.label}
                 active={activeItem === item.label}
                 collapsed={collapsed}
-                onClick={() => handleItemClick(item.label)}
+                onClick={() => {
+                  if (item.label === "Logout") {
+                    handleLogout();
+                  } else {
+                    handleItemClick(item.label);
+                  }
+                }}
               />
             ))}
           </Stack>

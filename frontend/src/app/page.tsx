@@ -453,15 +453,7 @@ export default function AuthPage() {
 
             {/* Footer */}
             <Box ta="center" mt="md">
-              <Text
-                size="xs"
-                c="slate.4"
-                style={{
-                  fontFamily: "var(--mantine-font-family)",
-                }}
-              >
-                Database Connection Manager v1.0
-              </Text>
+
             </Box>
           </Stack>
         </Paper>
