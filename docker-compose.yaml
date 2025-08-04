@@ -1,0 +1,86 @@
+services:
+  frontend:
+    restart: unless-stopped
+    networks:
+      - app-network
+    container_name: "frontend"
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        - PG_VERSION=17 # Specify the version of database server, major versions has to be the same
+    ports:
+      - "8080:8080"
+    volumes:
+      - local_backups_data:/etc/backups
+    env_file:
+      - .env
+    networks:
+      - app-network
+    depends_on:
+      app_db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    restart: unless-stopped
+
+  app_db:
+    container_name: api-db
+    image: "postgres:17"
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql 
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    env_file:
+      - .env
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+    networks:
+      - minio_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+volumes:
+  postgres_data:
+  local_backups_data:
+  minio_data:
+
+networks:
+  app-network:
+    driver: bridge

@@ -14,7 +14,6 @@ import (
 )
 
 func CreateSchedule(conn *gorm.DB, connectionId string, destinationId string, schedule string) error {
-	// Parse and validate the cron expression
 	parser := cron.NewParser(cron.SecondOptional | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
 	cronSchedule, err := parser.Parse(schedule)
 	if err != nil {
@@ -34,7 +33,6 @@ func CreateSchedule(conn *gorm.DB, connectionId string, destinationId string, sc
 		return err
 	}
 
-	// Calculate next run time based on current time and cron expression
 	now := time.Now()
 	nextRun := cronSchedule.Next(now)
 
@@ -92,7 +90,6 @@ func UpdateSchedule(conn *gorm.DB, scheduleId string, updates map[string]interfa
 		return errors.New("no valid fields to update")
 	}
 
-	// If schedule is being updated, recalculate next run time
 	if newScheduleStr, ok := filteredUpdates["schedule"]; ok {
 		parser := cron.NewParser(cron.SecondOptional | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
 		cronSchedule, err := parser.Parse(newScheduleStr.(string))
@@ -226,7 +223,6 @@ func DisableSchedule(conn *gorm.DB, scheduleId string) error {
 	})
 }
 
-// RecalculateNextRun updates the next run time for a schedule based on its cron expression
 func RecalculateNextRun(conn *gorm.DB, scheduleId string) error {
 	schedule, err := GetScheduleByID(conn, scheduleId)
 	if err != nil {
@@ -255,11 +251,9 @@ func RecalculateNextRun(conn *gorm.DB, scheduleId string) error {
 var scheduler *cron.Cron
 var schedulerMu sync.Mutex
 
-// loadBackupSchedules fetches all enabled backup schedules from the database
 func loadBackupSchedules(conn *gorm.DB) []db.BackupSchedule {
 	var schedules []db.BackupSchedule
 
-	// Get all enabled schedules with their relationships
 	if err := conn.Preload("Connection").Preload("Destination").Where("enabled = ?", true).Find(&schedules).Error; err != nil {
 		log.Printf("Error loading backup schedules: %v", err)
 		return nil
@@ -288,9 +282,7 @@ func executeBackup(conn *gorm.DB, schedule db.BackupSchedule) {
 	log.Printf("Backup executed for schedule ID: %d", schedule.ID)
 }
 
-// updateScheduleRunTimes updates the last_run and next_run times for a schedule
 func updateScheduleRunTimes(conn *gorm.DB, schedule db.BackupSchedule) {
-	// Parse the cron expression to calculate next run
 	parser := cron.NewParser(cron.SecondOptional | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
 	cronSchedule, err := parser.Parse(schedule.Schedule)
 	if err != nil {
@@ -301,7 +293,6 @@ func updateScheduleRunTimes(conn *gorm.DB, schedule db.BackupSchedule) {
 	now := time.Now()
 	nextRun := cronSchedule.Next(now)
 
-	// Update the database
 	updates := map[string]interface{}{
 		"last_run": &now,
 		"next_run": &nextRun,
@@ -316,21 +307,17 @@ func updateScheduleRunTimes(conn *gorm.DB, schedule db.BackupSchedule) {
 		schedule.ID, now.Format(time.RFC3339), nextRun.Format(time.RFC3339))
 }
 
-// RegisterBackupSchedules registers all enabled backup schedules with the cron scheduler
 func RegisterBackupSchedules(conn *gorm.DB) {
 	schedulerMu.Lock()
 	defer schedulerMu.Unlock()
 
-	// Stop existing scheduler if running
 	if scheduler != nil {
 		log.Println("Stopping existing backup scheduler...")
 		scheduler.Stop()
 	}
 
-	// Create new scheduler
 	scheduler = cron.New()
 
-	// Load backup schedules
 	schedules := loadBackupSchedules(conn)
 	if schedules == nil {
 		log.Println("No backup schedules loaded")
@@ -339,9 +326,7 @@ func RegisterBackupSchedules(conn *gorm.DB) {
 
 	log.Printf("Registering %d backup schedules", len(schedules))
 
-	// Register each schedule
 	for _, schedule := range schedules {
-		// Capture variable for closure
 		s := schedule
 
 		log.Printf("Registering backup schedule ID %d with cron: %s", s.ID, s.Schedule)
@@ -360,7 +345,6 @@ func RegisterBackupSchedules(conn *gorm.DB) {
 	scheduler.Start()
 }
 
-// StopBackupScheduler stops the running backup scheduler
 func StopBackupScheduler() {
 	schedulerMu.Lock()
 	defer schedulerMu.Unlock()
@@ -372,7 +356,6 @@ func StopBackupScheduler() {
 	}
 }
 
-// GetSchedulerStatus returns information about the current scheduler state
 func GetSchedulerStatus() map[string]interface{} {
 	schedulerMu.Lock()
 	defer schedulerMu.Unlock()
@@ -389,14 +372,12 @@ func GetSchedulerStatus() map[string]interface{} {
 	return status
 }
 
-// RestartBackupScheduler is a convenience function to restart the scheduler
 func RestartBackupScheduler(conn *gorm.DB) {
 	log.Println("Restarting backup scheduler...")
 	StopBackupScheduler()
 	RegisterBackupSchedules(conn)
 }
 
-// AddSingleSchedule adds a single schedule to the running scheduler
 func AddSingleSchedule(conn *gorm.DB, scheduleID uint) error {
 	schedulerMu.Lock()
 	defer schedulerMu.Unlock()
@@ -405,7 +386,6 @@ func AddSingleSchedule(conn *gorm.DB, scheduleID uint) error {
 		return fmt.Errorf("scheduler is not running")
 	}
 
-	// Load the specific schedule
 	var schedule db.BackupSchedule
 	if err := conn.Preload("Connection").Preload("Destination").First(&schedule, scheduleID).Error; err != nil {
 		return fmt.Errorf("error loading schedule %d: %v", scheduleID, err)
@@ -415,7 +395,6 @@ func AddSingleSchedule(conn *gorm.DB, scheduleID uint) error {
 		return fmt.Errorf("schedule %d is disabled", scheduleID)
 	}
 
-	// Add to scheduler
 	_, err := scheduler.AddFunc(schedule.Schedule, func() {
 		executeBackup(conn, schedule)
 	})

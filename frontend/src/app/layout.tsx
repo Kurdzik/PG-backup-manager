@@ -21,7 +21,7 @@ export default function RootLayout({ children }: { children: any }) {
           content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
         />
       </head>
-      <body>
+      <body style={{background: 'linear-gradient(135deg, var(--mantine-color-slate-0) 0%, var(--mantine-color-slate-0) 25%, var(--mantine-color-slate-2) 100%)'}}>
         <MantineProvider theme={theme}>
           <Notifications position="bottom-center" />
           {children}

@@ -41,33 +41,36 @@ func main() {
 	// User auth
 	api.POST("/user/create", handlers.CreateUser(dbConn))
 	api.POST("/user/login", handlers.LoginUser(dbConn))
+	api.GET("/user/list", handlers.ListUsers(dbConn))
+
+	apiProtected := api.Use(m.AuthMiddleware())
 
 	// Backup endpoints
-	api.POST("/backup/create", handlers.CreateBackup(dbConn))
-	api.POST("/backup/restore", handlers.RestoreFromBackup(dbConn))
-	api.GET("/backup/list", handlers.ListBackups(dbConn))
-	api.DELETE("/backup/delete", handlers.DeleteBackup(dbConn))
+	apiProtected.POST("/backup/create", handlers.CreateBackup(dbConn))
+	apiProtected.POST("/backup/restore", handlers.RestoreFromBackup(dbConn))
+	apiProtected.GET("/backup/list", handlers.ListBackups(dbConn))
+	apiProtected.DELETE("/backup/delete", handlers.DeleteBackup(dbConn))
 
 	// Backup destination endpoints
-	api.POST("/backup-destinations/s3/create", handlers.CreateBackupDestination(dbConn))
-	api.GET("/backup-destinations/s3/list", handlers.ListAllBackupDestinations(dbConn))
-	api.PUT("/backup-destinations/s3/update", handlers.UpdateBackupDestination(dbConn))
-	api.DELETE("/backup-destinations/s3/delete", handlers.DeleteBackupDestination(dbConn))
+	apiProtected.POST("/backup-destinations/s3/create", handlers.CreateBackupDestination(dbConn))
+	apiProtected.GET("/backup-destinations/s3/list", handlers.ListAllBackupDestinations(dbConn))
+	apiProtected.PUT("/backup-destinations/s3/update", handlers.UpdateBackupDestination(dbConn))
+	apiProtected.DELETE("/backup-destinations/s3/delete", handlers.DeleteBackupDestination(dbConn))
 
 	// Connection endpoints
-	api.POST("/connections/create", handlers.CreateConnection(dbConn))
-	api.GET("/connections/list", handlers.ListConnections(dbConn))
-	api.PUT("/connections/update", handlers.UpdateConnection(dbConn))
-	api.DELETE("/connections/delete", handlers.DeleteConnection(dbConn))
+	apiProtected.POST("/connections/create", handlers.CreateConnection(dbConn))
+	apiProtected.GET("/connections/list", handlers.ListConnections(dbConn))
+	apiProtected.PUT("/connections/update", handlers.UpdateConnection(dbConn))
+	apiProtected.DELETE("/connections/delete", handlers.DeleteConnection(dbConn))
 
 	// Backup schedule endpoints
-	api.POST("/schedules/create", handlers.CreateSchedule(dbConn))
-	api.GET("/schedules/list", handlers.ListSchedules(dbConn))
-	api.GET("/schedules/get", handlers.GetSchedule(dbConn))
-	api.PUT("/schedules/update", handlers.UpdateSchedule(dbConn))
-	api.DELETE("/schedules/delete", handlers.DeleteSchedule(dbConn))
-	api.POST("/schedules/enable", handlers.EnableSchedule(dbConn))
-	api.POST("/schedules/disable", handlers.DisableSchedule(dbConn))
+	apiProtected.POST("/schedules/create", handlers.CreateSchedule(dbConn))
+	apiProtected.GET("/schedules/list", handlers.ListSchedules(dbConn))
+	apiProtected.GET("/schedules/get", handlers.GetSchedule(dbConn))
+	apiProtected.PUT("/schedules/update", handlers.UpdateSchedule(dbConn))
+	apiProtected.DELETE("/schedules/delete", handlers.DeleteSchedule(dbConn))
+	apiProtected.POST("/schedules/enable", handlers.EnableSchedule(dbConn))
+	apiProtected.POST("/schedules/disable", handlers.DisableSchedule(dbConn))
 
 	log.Println("🚀 Application Startup Complete! 🚀")
 	r.Run(":8080")

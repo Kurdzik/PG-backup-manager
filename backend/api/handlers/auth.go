@@ -117,3 +117,25 @@ func LoginUser(conn *gorm.DB) gin.HandlerFunc {
 		})
 	}
 }
+
+func ListUsers(conn *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var users []db.User
+
+		result := conn.Find(&users)
+
+		if result.Error != nil {
+			log.Printf("Error during users listing")
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status": "Unexpected error occured",
+				"error":  result.Error.Error(),
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"status": "OK",
+			"data":   users,
+		})
+	}
+}

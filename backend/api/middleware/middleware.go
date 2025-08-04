@@ -1,7 +1,11 @@
 package middleware
 
 import (
+	"fmt"
 	"log"
+	"net/http"
+	"pg_bckup_mgr/auth"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,46 +29,26 @@ func CORSMiddleware() gin.HandlerFunc {
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		// Check for token in header first
 		authHeader := c.GetHeader("Authorization")
+		jwt := strings.Split(authHeader, " ")[1]
 
-		log.Println(authHeader)
+		if jwt == "" {
+			log.Println("JWT token not provided")
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "JWT token not provided"})
+			c.Abort()
+			return
+		}
 
-		// 	if os.Getenv("APP_ENV") != "DEV" {
+		claims, err := auth.ValidateJWT(jwt)
+		if err != nil {
+			log.Println("Invalid JWT token: ", err.Error())
+			c.JSON(http.StatusUnauthorized, gin.H{"error": fmt.Sprintf("Invalid JWT token: %s", err.Error())})
+			c.Abort()
+			return
+		}
 
-		// 		if tokenHeader == "" {
-		// 			log.Printf("JWT token not provided\n")
-		// 			c.JSON(401, gin.H{"error": "JWT token not provided"})
-		// 			c.Abort()
-		// 			return
-		// 		}
-
-		// 		// Validate and parse token
-		// 		claims, err := auth.ParseJWT(tokenHeader)
-		// 		if err != nil {
-		// 			log.Printf("Invalid or expired JWT token: %v\n", err)
-		// 			c.JSON(401, gin.H{"error": "Invalid or expired JWT token"})
-		// 			c.Abort()
-		// 			return
-		// 		}
-
-		// 		// Check if JWT Token is still valid
-		// 		if claims.Exp < time.Now().Unix() {
-		// 			log.Printf("Expired JWT token. Expired at: %v\n", claims.ExpiresAt)
-		// 			c.JSON(401, gin.H{"error": "Expired JWT token"})
-		// 			c.Abort()
-		// 			return
-		// 		}
-
-		// 		c.Set("AuthorizedApps", strings.Join(claims.AllowedPaths, ","))
-		// 		c.Set("IsValid", true)
-		// 		c.Set("FullUserName", claims.UserFullName)
-		// 		c.Set("UserEmail", claims.Username)
-		// 		c.Set("ADGroups", strings.Join(claims.ADGroups, ","))
-
-		// 	}
-
-		// 	c.Set("Content-Type", "application/json")
+		c.Set("FullUserName", claims.Username)
+		c.Set("Content-Type", "application/json")
 
 		c.Next()
 	}

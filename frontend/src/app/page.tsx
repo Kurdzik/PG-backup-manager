@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Container,
   Title,
@@ -13,20 +13,23 @@ import {
   Box,
   rem,
   Alert,
-  Flex
+  Flex,
+  Loader,
+  Center
 } from '@mantine/core';
 import {
   IconUser,
   IconLock,
   IconLogin,
   IconInfoCircle,
-  IconDatabase
+  IconDatabase,
+  IconUserPlus
 } from '@tabler/icons-react';
 
-import {post} from "@/lib/backendRequests"
-import {setAuthCookie} from "@/lib/cookies"
+import { post, get } from "@/lib/backendRequests"
+import { setAuthCookie } from "@/lib/cookies"
 
-interface LoginFormData {
+interface FormData {
   username: string;
   password: string;
 }
@@ -36,17 +39,62 @@ interface LoginResponse {
   status: string;
 }
 
-export default function LoginPage() {
-  const [formData, setFormData] = useState<LoginFormData>({
+interface UserListResponse {
+  data: Array<{
+    id: number;
+    username: string;
+    password: string;
+    created_at: string;
+    updated_at: string;
+  }>;
+  status: string;
+}
+
+interface CreateUserResponse {
+  status: string;
+}
+
+export default function AuthPage() {
+  const [formData, setFormData] = useState<FormData>({
     username: "",
     password: "",
   });
   const [loading, setLoading] = useState<boolean>(false);
+  const [checkingUsers, setCheckingUsers] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasUsers, setHasUsers] = useState<boolean>(false);
+  const [isRegistration, setIsRegistration] = useState<boolean>(false);
 
-  const handleFormDataChange = <K extends keyof LoginFormData>(
+  // Check if users exist on component mount
+  useEffect(() => {
+    checkForExistingUsers();
+  }, []);
+
+  const checkForExistingUsers = async (): Promise<void> => {
+    try {
+      setCheckingUsers(true);
+      const response: UserListResponse = await get("user/list", false);
+      
+      if (response.status === 'OK' && response.data && response.data.length > 0) {
+        setHasUsers(true);
+        setIsRegistration(false);
+      } else {
+        setHasUsers(false);
+        setIsRegistration(true);
+      }
+    } catch (err: any) {
+      console.error("Error checking for users:", err);
+      // If we can't check, assume we need registration
+      setHasUsers(false);
+      setIsRegistration(true);
+    } finally {
+      setCheckingUsers(false);
+    }
+  };
+
+  const handleFormDataChange = <K extends keyof FormData>(
     field: K,
-    value: LoginFormData[K]
+    value: FormData[K]
   ): void => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -65,7 +113,7 @@ export default function LoginPage() {
       const response: LoginResponse = await post("user/login", {
         username: formData.username,
         password: formData.password
-      });
+      }, false);
       
       if (response.payload && response.status.includes("logged in")) {
         console.log("JWT Token:", response.payload);
@@ -82,11 +130,64 @@ export default function LoginPage() {
     }
   };
 
-  const handleKeyPress = (event: React.KeyboardEvent): void => {
-    if (event.key === 'Enter' && isFormValid()) {
-      handleLogin();
+  const handleRegistration = async (): Promise<void> => {
+    if (!isFormValid()) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response: CreateUserResponse = await post("user/create", {
+        username: formData.username,
+        password: formData.password
+      }, false);
+      
+      if (response.status === 'User created succesfully') {
+        // After successful registration, automatically log in
+        await handleLogin();
+      } else {
+        setError(response.status || 'Registration failed');
+      }
+    } catch (err: any) {
+      setError(err.message || 'An error occurred during registration');
+      console.error("Registration error:", err);
+    } finally {
+      setLoading(false);
     }
   };
+
+  const handleSubmit = async (): Promise<void> => {
+    if (isRegistration) {
+      await handleRegistration();
+    } else {
+      await handleLogin();
+    }
+  };
+
+  const handleKeyPress = (event: React.KeyboardEvent): void => {
+    if (event.key === 'Enter' && isFormValid()) {
+      handleSubmit();
+    }
+  };
+
+  // Show loading spinner while checking for users
+  if (checkingUsers) {
+    return (
+      <Box
+        style={{
+          minHeight: '100vh',
+          background: 'linear-gradient(135deg, var(--mantine-color-slate-0) 0%, var(--mantine-color-slate-3) 50%, var(--mantine-color-slate-5) 100%)',
+        }}
+      >
+        <Center style={{ minHeight: '100vh' }}>
+          <Stack align="center" gap="md">
+            <Loader size="lg" color="slate" />
+            <Text c="slate.6" size="sm">Checking system status...</Text>
+          </Stack>
+        </Center>
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -94,10 +195,10 @@ export default function LoginPage() {
         minHeight: '100vh',
         position: 'relative',
         overflow: 'hidden',
-        background: 'linear-gradient(135deg, var(--mantine-color-slate-0) 0%, var(--mantine-color-slate-3) 50%, var(--mantine-color-slate-5) 100%)', // Subtle gradient using theme colors
+        background: 'linear-gradient(135deg, var(--mantine-color-slate-0) 0%, var(--mantine-color-slate-3) 50%, var(--mantine-color-slate-5) 100%)',
       }}
     >
-      {/* Blurred Background Elements - Updated to use theme colors */}
+      {/* Blurred Background Elements */}
       <Box
         style={{
           position: 'absolute',
@@ -106,9 +207,9 @@ export default function LoginPage() {
           width: '35%',
           height: '50%',
           borderRadius: '50%',
-          background: 'var(--mantine-color-slate-4)', // Much more subtle
+          background: 'var(--mantine-color-slate-4)',
           filter: 'blur(120px)',
-          opacity: 0.15, // Reduced opacity for subtlety
+          opacity: 0.15,
           zIndex: 0,
         }}
       />
@@ -120,9 +221,9 @@ export default function LoginPage() {
           width: '45%',
           height: '60%',
           borderRadius: '50%',
-          background: 'var(--mantine-color-slate-3)', // Even more subtle
+          background: 'var(--mantine-color-slate-3)',
           filter: 'blur(140px)',
-          opacity: 0.12, // Very subtle
+          opacity: 0.12,
           zIndex: 0,
         }}
       />
@@ -134,9 +235,9 @@ export default function LoginPage() {
           width: '25%',
           height: '35%',
           borderRadius: '50%',
-          background: 'var(--mantine-color-slate-5)', // Slightly darker but still subtle
+          background: 'var(--mantine-color-slate-5)',
           filter: 'blur(100px)',
-          opacity: 0.1, // Very subtle accent
+          opacity: 0.1,
           zIndex: 0,
         }}
       />
@@ -154,17 +255,17 @@ export default function LoginPage() {
         }}
       >
         <Paper
-          shadow="md" // Using theme shadow
+          shadow="md"
           p="xl"
-          radius="sm" // Using theme radius
+          radius="sm"
           withBorder
           style={{
             width: '100%',
             maxWidth: rem(400),
-            backgroundColor: 'var(--mantine-color-neutral-0)', // Pure white from theme
+            backgroundColor: 'var(--mantine-color-neutral-0)',
             backdropFilter: 'blur(12px)',
-            border: '1px solid var(--mantine-color-neutral-2)', // Theme border
-            transition: 'all 150ms ease', // Theme transition speed
+            border: '1px solid var(--mantine-color-neutral-2)',
+            transition: 'all 150ms ease',
           }}
         >
           <Stack gap="lg">
@@ -175,8 +276,8 @@ export default function LoginPage() {
                   style={{
                     padding: rem(14),
                     borderRadius: rem(8),
-                    backgroundColor: 'var(--mantine-color-slate-1)', // Theme background
-                    border: '1px solid var(--mantine-color-slate-2)', // Theme border
+                    backgroundColor: 'var(--mantine-color-slate-1)',
+                    border: '1px solid var(--mantine-color-slate-2)',
                     transition: 'all 150ms ease',
                   }}
                 >
@@ -188,21 +289,24 @@ export default function LoginPage() {
                 size="1.5rem" 
                 fw={600} 
                 mb="xs" 
-                c="slate.8" // Theme text color
-                style={{
-                  fontFamily: 'var(--mantine-font-family)', // Theme font
-                }}
-              >
-                Welcome Back
-              </Title>
-              <Text 
-                size="sm" 
-                c="slate.5" // More muted text color from theme
+                c="slate.8"
                 style={{
                   fontFamily: 'var(--mantine-font-family)',
                 }}
               >
-                Sign in to manage your database connections
+                {isRegistration ? 'Get Started' : 'Welcome Back'}
+              </Title>
+              <Text 
+                size="sm" 
+                c="slate.5"
+                style={{
+                  fontFamily: 'var(--mantine-font-family)',
+                }}
+              >
+                {isRegistration 
+                  ? 'Create your admin account to get started' 
+                  : 'Sign in to manage your database connections'
+                }
               </Text>
             </Box>
 
@@ -222,13 +326,13 @@ export default function LoginPage() {
               </Alert>
             )}
 
-            {/* Login Form */}
+            {/* Form */}
             <Stack gap="md">
               <TextInput
                 label="Username"
                 placeholder="Enter your username"
                 required
-                size="sm" // Consistent with theme
+                size="sm"
                 leftSection={<IconUser size={16} color="var(--mantine-color-slate-5)" />}
                 value={formData.username}
                 onChange={(event) =>
@@ -289,12 +393,12 @@ export default function LoginPage() {
               <Button
                 fullWidth
                 size="sm"
-                leftSection={<IconLogin size={16} />}
-                onClick={handleLogin}
+                leftSection={isRegistration ? <IconUserPlus size={16} /> : <IconLogin size={16} />}
+                onClick={handleSubmit}
                 loading={loading}
                 disabled={!isFormValid()}
                 mt="md"
-                color="slate" // Using theme primary color
+                color="slate"
                 styles={{
                   root: {
                     height: rem(40),
@@ -315,7 +419,7 @@ export default function LoginPage() {
                   },
                 }}
               >
-                Sign In
+                {isRegistration ? 'Create Account' : 'Sign In'}
               </Button>
             </Stack>
 
@@ -323,7 +427,7 @@ export default function LoginPage() {
             <Box ta="center" mt="md">
               <Text 
                 size="xs" 
-                c="slate.4" // Even more muted footer text
+                c="slate.4"
                 style={{
                   fontFamily: 'var(--mantine-font-family)',
                 }}

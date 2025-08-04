@@ -58,7 +58,6 @@ func deriveKey(salt []byte) ([]byte, error) {
 	return key, nil
 }
 
-// HashPassword hashes a password using Argon2id with SECRET_KEY and returns a base64 encoded string
 func HashPassword(password string) (string, error) {
 	params := getDefaultParams()
 
@@ -81,7 +80,6 @@ func HashPassword(password string) (string, error) {
 	return encoded, nil
 }
 
-// ValidatePassword validates a plain password against a hashed password
 func ValidatePassword(plainPassword, hashedPassword string) error {
 	params := getDefaultParams()
 
@@ -110,7 +108,6 @@ func ValidatePassword(plainPassword, hashedPassword string) error {
 	return nil
 }
 
-// hashPasswordWithSalt is a helper function that hashes a password with a given salt
 func hashPasswordWithSalt(password string, salt []byte) ([]byte, error) {
 	secretKey := os.Getenv("SECRET_KEY")
 	if secretKey == "" {
@@ -242,7 +239,6 @@ func DecryptString(encryptedStr string) (string, error) {
 	return string(plaintext), nil
 }
 
-// getJWTSigningKey returns the signing key for JWT tokens
 func getJWTSigningKey() ([]byte, error) {
 	secretKey := os.Getenv("SECRET_KEY")
 	if secretKey == "" {
@@ -251,7 +247,6 @@ func getJWTSigningKey() ([]byte, error) {
 	return []byte(secretKey), nil
 }
 
-// CreateJWT creates a new JWT token for the given username with specified expiration duration
 func CreateJWT(username string, expirationDuration time.Duration) (string, error) {
 	if username == "" {
 		return "", fmt.Errorf("username cannot be empty")
@@ -284,7 +279,6 @@ func CreateJWT(username string, expirationDuration time.Duration) (string, error
 	return tokenString, nil
 }
 
-// ValidateJWT validates a JWT token and returns the claims if valid
 func ValidateJWT(tokenString string) (*JWTClaims, error) {
 	if tokenString == "" {
 		return nil, fmt.Errorf("token cannot be empty")
@@ -296,7 +290,6 @@ func ValidateJWT(tokenString string) (*JWTClaims, error) {
 	}
 
 	token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
-		// Verify the signing method
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
@@ -316,7 +309,6 @@ func ValidateJWT(tokenString string) (*JWTClaims, error) {
 		return nil, fmt.Errorf("token is invalid")
 	}
 
-	// Additional expiry check (jwt library also checks this, but we're being explicit)
 	now := time.Now().Unix()
 	if claims.Exp < now {
 		return nil, fmt.Errorf("token has expired")
