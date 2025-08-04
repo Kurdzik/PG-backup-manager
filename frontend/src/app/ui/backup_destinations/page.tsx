@@ -1,8 +1,7 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react";
 import {
-  Container,
   Title,
   Text,
   Button,
@@ -20,27 +19,27 @@ import {
   Flex,
   Alert,
   Box,
-  rem,
   Drawer,
-} from '@mantine/core';
+} from "@mantine/core";
 import {
   IconCloud,
   IconPlus,
   IconEdit,
   IconTrash,
   IconRefresh,
-  IconCheck,
-  IconX,
   IconInfoCircle,
   IconDatabase,
   IconPlugConnected,
-} from '@tabler/icons-react';
+} from "@tabler/icons-react";
 
 import { get, post, put, del } from "@/lib/backendRequests";
 import BottomRightNotification from "@/components/Notifications";
-import {NotificationData} from "@/components/Notifications";
-import {BackupDestination, DatabaseConnection, ApiResponse} from "@/lib/types"
-
+import { NotificationData } from "@/components/Notifications";
+import {
+  BackupDestination,
+  DatabaseConnection,
+  ApiResponse,
+} from "@/lib/types";
 
 interface DestinationFormData {
   connection_id: string;
@@ -55,15 +54,18 @@ interface DestinationFormData {
   verify_ssl: boolean;
 }
 
-
 export default function S3BackupDestinations() {
   const [destinations, setDestinations] = useState<BackupDestination[]>([]);
   const [connections, setConnections] = useState<DatabaseConnection[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
   const [confirmModalOpened, setConfirmModalOpened] = useState<boolean>(false);
-  const [destinationToDelete, setDestinationToDelete] = useState<{id: number, name: string} | null>(null);
-  const [editingDestination, setEditingDestination] = useState<BackupDestination | null>(null);
+  const [destinationToDelete, setDestinationToDelete] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
+  const [editingDestination, setEditingDestination] =
+    useState<BackupDestination | null>(null);
   const [formData, setFormData] = useState<DestinationFormData>({
     connection_id: "",
     name: "",
@@ -76,7 +78,9 @@ export default function S3BackupDestinations() {
     use_ssl: true,
     verify_ssl: true,
   });
-  const [notification, setNotification] = useState<NotificationData | null>(null);
+  const [notification, setNotification] = useState<NotificationData | null>(
+    null,
+  );
   const [formLoading, setFormLoading] = useState<boolean>(false);
   const [testLoading, setTestLoading] = useState<boolean>(false);
 
@@ -84,7 +88,11 @@ export default function S3BackupDestinations() {
     loadData();
   }, []);
 
-  const showNotification = (type: 'success' | 'error', title: string, message: string): void => {
+  const showNotification = (
+    type: "success" | "error",
+    title: string,
+    message: string,
+  ): void => {
     setNotification({ type, title, message });
     setTimeout(() => setNotification(null), 5000);
   };
@@ -94,13 +102,15 @@ export default function S3BackupDestinations() {
       setLoading(true);
       const [connectionsRes, destinationsRes] = await Promise.all([
         get("connections/list") as Promise<ApiResponse<DatabaseConnection[]>>,
-        get("backup-destinations/s3/list") as Promise<ApiResponse<BackupDestination[]>>
+        get("backup-destinations/s3/list") as Promise<
+          ApiResponse<BackupDestination[]>
+        >,
       ]);
-      
+
       setConnections(connectionsRes.data || []);
       setDestinations(destinationsRes.data || []);
     } catch (err) {
-      showNotification('error', 'Error', 'Failed to load data');
+      showNotification("error", "Error", "Failed to load data");
       console.error("Error loading data:", err);
     } finally {
       setLoading(false);
@@ -110,32 +120,47 @@ export default function S3BackupDestinations() {
   const handleTestConnection = async (): Promise<void> => {
     try {
       setTestLoading(true);
-      
+
       // Convert connection_id to number for API
       const payload = {
         ...formData,
-        connection_id: parseInt(formData.connection_id, 10)
+        connection_id: parseInt(formData.connection_id, 10),
       };
-      
-      const response: ApiResponse = await post("backup-destinations/s3/create?test_connection=true", payload);
-      
+
+      const response: ApiResponse = await post(
+        "backup-destinations/s3/create?test_connection=true",
+        payload,
+      );
+
       // Check for successful response
-      if (response.status?.includes("successfully") || response.status?.includes("success")) {
-        showNotification('success', 'Connection Test Successful', 'S3 destination configuration is valid and connection successful');
+      if (
+        response.status?.includes("successfully") ||
+        response.status?.includes("success")
+      ) {
+        showNotification(
+          "success",
+          "Connection Test Successful",
+          "S3 destination configuration is valid and connection successful",
+        );
       } else {
-        showNotification('error', 'Connection Test Failed', 'Unable to connect to S3 destination with provided configuration');
+        showNotification(
+          "error",
+          "Connection Test Failed",
+          "Unable to connect to S3 destination with provided configuration",
+        );
       }
     } catch (err: any) {
       // Handle different types of errors
-      let errorMessage = 'Connection test failed. Please check your configuration.';
-      
+      let errorMessage =
+        "Connection test failed. Please check your configuration.";
+
       if (err.response?.data?.message) {
         errorMessage = err.response.data.message;
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
-      showNotification('error', 'Connection Test Failed', errorMessage);
+
+      showNotification("error", "Connection Test Failed", errorMessage);
       console.error("Error testing connection:", err);
     } finally {
       setTestLoading(false);
@@ -146,47 +171,67 @@ export default function S3BackupDestinations() {
     try {
       setFormLoading(true);
       let response: ApiResponse;
-      
+
       // Convert connection_id to number for API
       const payload = {
         ...formData,
-        connection_id: parseInt(formData.connection_id, 10)
+        connection_id: parseInt(formData.connection_id, 10),
       };
-      
+
       if (editingDestination) {
-        response = await put(`backup-destinations/s3/update?destination_id=${editingDestination.id}`, payload);
+        response = await put(
+          `backup-destinations/s3/update?destination_id=${editingDestination.id}`,
+          payload,
+        );
       } else {
         response = await post("backup-destinations/s3/create", payload);
       }
-      
+
       if (response.status || response.status?.includes("successfully")) {
-        showNotification('success', 'Success', response.status || 'Operation completed successfully');
+        showNotification(
+          "success",
+          "Success",
+          response.status || "Operation completed successfully",
+        );
         setDrawerOpened(false);
         resetForm();
         loadData();
       }
     } catch (err) {
-      showNotification('error', 'Error', `Failed to ${editingDestination ? 'update' : 'create'} backup destination`);
+      showNotification(
+        "error",
+        "Error",
+        `Failed to ${editingDestination ? "update" : "create"} backup destination`,
+      );
       console.error("Error submitting form:", err);
     } finally {
       setFormLoading(false);
     }
   };
 
-  const handleDelete = async (destinationId: number, destinationName: string): Promise<void> => {
+  const handleDelete = async (
+    destinationId: number,
+    destinationName: string,
+  ): Promise<void> => {
     setDestinationToDelete({ id: destinationId, name: destinationName });
     setConfirmModalOpened(true);
   };
 
   const confirmDelete = async (): Promise<void> => {
     if (!destinationToDelete) return;
-    
+
     try {
-      const response: ApiResponse = await del(`backup-destinations/s3/delete?destination_id=${destinationToDelete.id}`);
-      showNotification('success', 'Success', 'Backup destination deleted successfully');
+      const response: ApiResponse = await del(
+        `backup-destinations/s3/delete?destination_id=${destinationToDelete.id}`,
+      );
+      showNotification(
+        "success",
+        "Success",
+        "Backup destination deleted successfully",
+      );
       loadData();
     } catch (err) {
-      showNotification('error', 'Error', 'Failed to delete backup destination');
+      showNotification("error", "Error", "Failed to delete backup destination");
       console.error("Error deleting destination:", err);
     } finally {
       setConfirmModalOpened(false);
@@ -240,20 +285,20 @@ export default function S3BackupDestinations() {
 
   const formatDate = (dateString: string): string => {
     if (!dateString || dateString === "0001-01-01T00:00:00Z") return "N/A";
-    return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(dateString).toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const handleFormDataChange = <K extends keyof DestinationFormData>(
     field: K,
-    value: DestinationFormData[K]
+    value: DestinationFormData[K],
   ): void => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const isFormValid = (): boolean => {
@@ -269,13 +314,15 @@ export default function S3BackupDestinations() {
   };
 
   const getConnectionName = (connectionId: number): string => {
-    const connection = connections.find(c => c.id === connectionId);
-    return connection ? `${connection.postgres_db_name} (${connection.postgres_host})` : 'Unknown';
+    const connection = connections.find((c) => c.id === connectionId);
+    return connection
+      ? `${connection.postgres_db_name} (${connection.postgres_host})`
+      : "Unknown";
   };
 
-  const connectionOptions = connections.map(conn => ({
+  const connectionOptions = connections.map((conn) => ({
     value: conn.id.toString(),
-    label: `${conn.postgres_db_name} (${conn.postgres_host})`
+    label: `${conn.postgres_db_name} (${conn.postgres_host})`,
   }));
 
   const rows = destinations.map((destination: BackupDestination) => (
@@ -284,8 +331,12 @@ export default function S3BackupDestinations() {
         <Flex align="center" gap="sm">
           <IconCloud size={18} color="#495057" />
           <Box>
-            <Text fw={500} size="md">{destination.name}</Text>
-            <Text size="xs" c="dimmed">{destination.bucket_name}</Text>
+            <Text fw={500} size="md">
+              {destination.name}
+            </Text>
+            <Text size="xs" c="dimmed">
+              {destination.bucket_name}
+            </Text>
           </Box>
         </Flex>
       </Table.Td>
@@ -306,15 +357,17 @@ export default function S3BackupDestinations() {
       <Table.Td>
         <Group gap="xs">
           <Badge variant="outline" size="sm" radius={"sm"}>
-            SSL: {destination.use_ssl ? 'On' : 'Off'}
+            SSL: {destination.use_ssl ? "On" : "Off"}
           </Badge>
           <Badge variant="outline" size="sm" radius={"sm"}>
-            Verify: {destination.verify_ssl ? 'On' : 'Off'}
+            Verify: {destination.verify_ssl ? "On" : "Off"}
           </Badge>
         </Group>
       </Table.Td>
       <Table.Td>
-        <Text size="sm" c="dimmed">{formatDate(destination.created_at)}</Text>
+        <Text size="sm" c="dimmed">
+          {formatDate(destination.created_at)}
+        </Text>
       </Table.Td>
       <Table.Td>
         <Group gap="xs">
@@ -339,11 +392,11 @@ export default function S3BackupDestinations() {
   ));
 
   return (
-    <Box style={{ width: '90%', margin: '0 auto', padding: '2rem 0' }}>
+    <Box style={{ width: "90%", margin: "0 auto", padding: "2rem 0" }}>
       {/* Bottom-right notification */}
-      <BottomRightNotification 
-        notification={notification} 
-        onClose={() => setNotification(null)} 
+      <BottomRightNotification
+        notification={notification}
+        onClose={() => setNotification(null)}
       />
 
       {/* Header */}
@@ -363,7 +416,7 @@ export default function S3BackupDestinations() {
 
       {/* Action Bar */}
       <Box mb="xl">
-        <Flex justify="space-between" align="center" style={{ width: '100%' }}>
+        <Flex justify="space-between" align="center" style={{ width: "100%" }}>
           <Group>
             <Button
               leftSection={<IconRefresh size={16} />}
@@ -374,7 +427,8 @@ export default function S3BackupDestinations() {
               Refresh
             </Button>
             <Badge variant="outline" radius={"sm"} size="md">
-              {destinations.length} destination{destinations.length !== 1 ? 's' : ''}
+              {destinations.length} destination
+              {destinations.length !== 1 ? "s" : ""}
             </Badge>
           </Group>
           <Button
@@ -387,12 +441,18 @@ export default function S3BackupDestinations() {
       </Box>
 
       {/* Destinations Table */}
-      <Paper shadow="sm" p="lg" pos="relative" style={{ width: '100%' }}>
+      <Paper shadow="sm" p="lg" pos="relative" style={{ width: "100%" }}>
         <LoadingOverlay visible={loading} />
-        
+
         {destinations.length === 0 && !loading ? (
-          <Alert icon={<IconInfoCircle size={20} />} title="No backup destinations found" color="blue">
-            <Text>Get started by creating your first S3 backup destination.</Text>
+          <Alert
+            icon={<IconInfoCircle size={20} />}
+            title="No backup destinations found"
+            color="blue"
+          >
+            <Text>
+              Get started by creating your first S3 backup destination.
+            </Text>
           </Alert>
         ) : (
           <Table striped highlightOnHover>
@@ -418,7 +478,9 @@ export default function S3BackupDestinations() {
         onClose={closeDrawer}
         title={
           <Text fw={600} size="lg">
-            {editingDestination ? "Edit Backup Destination" : "Create New Backup Destination"}
+            {editingDestination
+              ? "Edit Backup Destination"
+              : "Create New Backup Destination"}
           </Text>
         }
         position="left"
@@ -433,7 +495,7 @@ export default function S3BackupDestinations() {
             data={connectionOptions}
             value={formData.connection_id}
             onChange={(value) =>
-              handleFormDataChange('connection_id', value || "")
+              handleFormDataChange("connection_id", value || "")
             }
             disabled={!!editingDestination}
           />
@@ -444,7 +506,7 @@ export default function S3BackupDestinations() {
             required
             value={formData.name}
             onChange={(event) =>
-              handleFormDataChange('name', event.currentTarget.value)
+              handleFormDataChange("name", event.currentTarget.value)
             }
           />
 
@@ -454,7 +516,7 @@ export default function S3BackupDestinations() {
             required
             value={formData.endpoint_url}
             onChange={(event) =>
-              handleFormDataChange('endpoint_url', event.currentTarget.value)
+              handleFormDataChange("endpoint_url", event.currentTarget.value)
             }
           />
 
@@ -464,7 +526,7 @@ export default function S3BackupDestinations() {
             required
             value={formData.region}
             onChange={(event) =>
-              handleFormDataChange('region', event.currentTarget.value)
+              handleFormDataChange("region", event.currentTarget.value)
             }
           />
 
@@ -474,7 +536,7 @@ export default function S3BackupDestinations() {
             required
             value={formData.bucket_name}
             onChange={(event) =>
-              handleFormDataChange('bucket_name', event.currentTarget.value)
+              handleFormDataChange("bucket_name", event.currentTarget.value)
             }
           />
 
@@ -484,7 +546,7 @@ export default function S3BackupDestinations() {
             required
             value={formData.access_key_id}
             onChange={(event) =>
-              handleFormDataChange('access_key_id', event.currentTarget.value)
+              handleFormDataChange("access_key_id", event.currentTarget.value)
             }
           />
 
@@ -495,7 +557,10 @@ export default function S3BackupDestinations() {
             required
             value={formData.secret_access_key}
             onChange={(event) =>
-              handleFormDataChange('secret_access_key', event.currentTarget.value)
+              handleFormDataChange(
+                "secret_access_key",
+                event.currentTarget.value,
+              )
             }
           />
 
@@ -504,7 +569,7 @@ export default function S3BackupDestinations() {
             placeholder="postgres/ (optional)"
             value={formData.path_prefix}
             onChange={(event) =>
-              handleFormDataChange('path_prefix', event.currentTarget.value)
+              handleFormDataChange("path_prefix", event.currentTarget.value)
             }
           />
 
@@ -512,7 +577,7 @@ export default function S3BackupDestinations() {
             label="Use SSL"
             checked={formData.use_ssl}
             onChange={(event) =>
-              handleFormDataChange('use_ssl', event.currentTarget.checked)
+              handleFormDataChange("use_ssl", event.currentTarget.checked)
             }
           />
 
@@ -520,7 +585,7 @@ export default function S3BackupDestinations() {
             label="Verify SSL Certificate"
             checked={formData.verify_ssl}
             onChange={(event) =>
-              handleFormDataChange('verify_ssl', event.currentTarget.checked)
+              handleFormDataChange("verify_ssl", event.currentTarget.checked)
             }
           />
 
@@ -561,7 +626,7 @@ export default function S3BackupDestinations() {
       >
         <Stack gap="lg">
           <Text size="md">
-            Are you sure you want to delete the backup destination{' '}
+            Are you sure you want to delete the backup destination{" "}
             <Text span fw={600}>
               "{destinationToDelete?.name}"
             </Text>
@@ -570,18 +635,15 @@ export default function S3BackupDestinations() {
           <Text size="sm" c="dimmed">
             This action cannot be undone.
           </Text>
-          
+
           <Group justify="flex-end" mt="lg">
-            <Button 
-              variant="subtle" 
+            <Button
+              variant="subtle"
               onClick={() => setConfirmModalOpened(false)}
             >
               Cancel
             </Button>
-            <Button 
-              color="red" 
-              onClick={confirmDelete}
-            >
+            <Button color="red" onClick={confirmDelete}>
               Delete Destination
             </Button>
           </Group>

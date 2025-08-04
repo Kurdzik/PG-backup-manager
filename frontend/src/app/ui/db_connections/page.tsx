@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react";
 import {
-  Container,
+
   Title,
   Text,
   Button,
@@ -20,27 +20,25 @@ import {
   Flex,
   Alert,
   Box,
-  rem,
+
   Drawer,
-} from '@mantine/core';
+} from "@mantine/core";
 import {
   IconDatabase,
   IconPlus,
   IconEdit,
   IconTrash,
   IconRefresh,
-  IconCheck,
-  IconX,
+
   IconInfoCircle,
   IconServer,
   IconPlugConnected,
-} from '@tabler/icons-react';
+} from "@tabler/icons-react";
 
 import { get, post, put, del } from "@/lib/backendRequests";
 import BottomRightNotification from "@/components/Notifications";
-import {NotificationData } from "@/components/Notifications";
-import {DatabaseConnection, ApiResponse} from "@/lib/types"
-
+import { NotificationData } from "@/components/Notifications";
+import { DatabaseConnection, ApiResponse } from "@/lib/types";
 
 interface ConnectionFormData {
   postgres_host: string;
@@ -50,15 +48,17 @@ interface ConnectionFormData {
   postgres_password: string;
 }
 
-
-
 export default function DatabaseConnectionsDashboard() {
   const [connections, setConnections] = useState<DatabaseConnection[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
   const [confirmModalOpened, setConfirmModalOpened] = useState<boolean>(false);
-  const [connectionToDelete, setConnectionToDelete] = useState<{id: number, name: string} | null>(null);
-  const [editingConnection, setEditingConnection] = useState<DatabaseConnection | null>(null);
+  const [connectionToDelete, setConnectionToDelete] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
+  const [editingConnection, setEditingConnection] =
+    useState<DatabaseConnection | null>(null);
   const [formData, setFormData] = useState<ConnectionFormData>({
     postgres_host: "",
     postgres_port: "5432",
@@ -66,7 +66,9 @@ export default function DatabaseConnectionsDashboard() {
     postgres_user: "",
     postgres_password: "",
   });
-  const [notification, setNotification] = useState<NotificationData | null>(null);
+  const [notification, setNotification] = useState<NotificationData | null>(
+    null,
+  );
   const [formLoading, setFormLoading] = useState<boolean>(false);
   const [testLoading, setTestLoading] = useState<boolean>(false);
 
@@ -74,7 +76,11 @@ export default function DatabaseConnectionsDashboard() {
     loadConnections();
   }, []);
 
-  const showNotification = (type: 'success' | 'error', title: string, message: string): void => {
+  const showNotification = (
+    type: "success" | "error",
+    title: string,
+    message: string,
+  ): void => {
     setNotification({ type, title, message });
     setTimeout(() => setNotification(null), 5000);
   };
@@ -82,10 +88,11 @@ export default function DatabaseConnectionsDashboard() {
   const loadConnections = async (): Promise<void> => {
     try {
       setLoading(true);
-      const response: ApiResponse<DatabaseConnection[]> = await get("connections/list");
+      const response: ApiResponse<DatabaseConnection[]> =
+        await get("connections/list");
       setConnections(response.data || []);
     } catch (err) {
-      showNotification('error', 'Error', 'Failed to load connections');
+      showNotification("error", "Error", "Failed to load connections");
       console.error("Error loading connections:", err);
     } finally {
       setLoading(false);
@@ -95,28 +102,44 @@ export default function DatabaseConnectionsDashboard() {
   const handleTestConnection = async (): Promise<void> => {
     try {
       setTestLoading(true);
-      
-      const response: ApiResponse = await post("connections/create?test_connection=true", formData);
-      
+
+      const response: ApiResponse = await post(
+        "connections/create?test_connection=true",
+        formData,
+      );
+
       // Check for successful response
-      if (response.status || response.status?.includes("successfully") || response.status?.includes("success")) {
-        showNotification('success', 'Connection Test Successful', 
-          response.status || 'Database connection is valid and working correctly');
+      if (
+        response.status ||
+        response.status?.includes("successfully") ||
+        response.status?.includes("success")
+      ) {
+        showNotification(
+          "success",
+          "Connection Test Successful",
+          response.status ||
+            "Database connection is valid and working correctly",
+        );
       } else {
-        showNotification('error', 'Connection Test Failed', 
-          response.status || 'Unable to connect to database with provided credentials');
+        showNotification(
+          "error",
+          "Connection Test Failed",
+          response.status ||
+            "Unable to connect to database with provided credentials",
+        );
       }
     } catch (err: any) {
       // Handle different types of errors
-      let errorMessage = 'Connection test failed. Please check your database credentials and network connectivity.';
-      
+      let errorMessage =
+        "Connection test failed. Please check your database credentials and network connectivity.";
+
       if (err.response?.data?.message) {
         errorMessage = err.response.data.message;
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
-      showNotification('error', 'Connection Test Failed', errorMessage);
+
+      showNotification("error", "Connection Test Failed", errorMessage);
       console.error("Error testing connection:", err);
     } finally {
       setTestLoading(false);
@@ -127,43 +150,65 @@ export default function DatabaseConnectionsDashboard() {
     try {
       setFormLoading(true);
       let response: ApiResponse;
-      
+
       if (editingConnection) {
-        response = await put(`connections/update?connection_id=${editingConnection.id}`, formData);
+        response = await put(
+          `connections/update?connection_id=${editingConnection.id}`,
+          formData,
+        );
       } else {
         response = await post("connections/create", formData);
       }
-      
+
       if (response.status?.includes("successfully") || response.status) {
-        showNotification('success', 'Success', response.status || response.status || 'Operation completed successfully');
+        showNotification(
+          "success",
+          "Success",
+          response.status ||
+            response.status ||
+            "Operation completed successfully",
+        );
         setDrawerOpened(false);
         resetForm();
         loadConnections();
       }
     } catch (err) {
-      showNotification('error', 'Error', `Failed to ${editingConnection ? 'update' : 'create'} connection`);
+      showNotification(
+        "error",
+        "Error",
+        `Failed to ${editingConnection ? "update" : "create"} connection`,
+      );
       console.error("Error submitting form:", err);
     } finally {
       setFormLoading(false);
     }
   };
 
-  const handleDelete = async (connectionId: number, connectionName: string): Promise<void> => {
+  const handleDelete = async (
+    connectionId: number,
+    connectionName: string,
+  ): Promise<void> => {
     setConnectionToDelete({ id: connectionId, name: connectionName });
     setConfirmModalOpened(true);
   };
 
   const confirmDelete = async (): Promise<void> => {
     if (!connectionToDelete) return;
-    
+
     try {
-      const response: ApiResponse = await del(`connections/delete?connection_id=${connectionToDelete.id}`);
+      const response: ApiResponse = await del(
+        `connections/delete?connection_id=${connectionToDelete.id}`,
+      );
       if (response.status?.includes("successfully")) {
-        showNotification('success', 'Success', 'Connection deleted successfully');
+        showNotification(
+          "success",
+          "Success",
+          "Connection deleted successfully",
+        );
         loadConnections();
       }
     } catch (err) {
-      showNotification('error', 'Error', 'Failed to delete connection');
+      showNotification("error", "Error", "Failed to delete connection");
       console.error("Error deleting connection:", err);
     } finally {
       setConfirmModalOpened(false);
@@ -207,20 +252,20 @@ export default function DatabaseConnectionsDashboard() {
 
   const formatDate = (dateString: string): string => {
     if (!dateString || dateString === "0001-01-01T00:00:00Z") return "N/A";
-    return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(dateString).toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const handleFormDataChange = <K extends keyof ConnectionFormData>(
     field: K,
-    value: ConnectionFormData[K]
+    value: ConnectionFormData[K],
   ): void => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const isFormValid = (): boolean => {
@@ -239,8 +284,12 @@ export default function DatabaseConnectionsDashboard() {
         <Flex align="center" gap="sm">
           <IconServer size={18} color="#495057" />
           <Box>
-            <Text fw={500} size="md">{connection.postgres_db_name}</Text>
-            <Text size="xs" c="dimmed">{connection.postgres_host}:{connection.postgres_port}</Text>
+            <Text fw={500} size="md">
+              {connection.postgres_db_name}
+            </Text>
+            <Text size="xs" c="dimmed">
+              {connection.postgres_host}:{connection.postgres_port}
+            </Text>
           </Box>
         </Flex>
       </Table.Td>
@@ -250,10 +299,14 @@ export default function DatabaseConnectionsDashboard() {
         </Badge>
       </Table.Td>
       <Table.Td>
-        <Text size="sm" c="dimmed">{formatDate(connection.created_at)}</Text>
+        <Text size="sm" c="dimmed">
+          {formatDate(connection.created_at)}
+        </Text>
       </Table.Td>
       <Table.Td>
-        <Text size="sm" c="dimmed">{formatDate(connection.updated_at)}</Text>
+        <Text size="sm" c="dimmed">
+          {formatDate(connection.updated_at)}
+        </Text>
       </Table.Td>
       <Table.Td>
         <Group gap="xs">
@@ -267,7 +320,9 @@ export default function DatabaseConnectionsDashboard() {
           <ActionIcon
             variant="outline"
             color="error"
-            onClick={() => handleDelete(connection.id, connection.postgres_db_name)}
+            onClick={() =>
+              handleDelete(connection.id, connection.postgres_db_name)
+            }
             aria-label={`Delete connection ${connection.postgres_db_name}`}
           >
             <IconTrash size={16} />
@@ -278,11 +333,11 @@ export default function DatabaseConnectionsDashboard() {
   ));
 
   return (
-    <Box style={{ width: '90%', margin: '0 auto', padding: '2rem 0' }}>
+    <Box style={{ width: "90%", margin: "0 auto", padding: "2rem 0" }}>
       {/* Bottom-right notification */}
-      <BottomRightNotification 
-        notification={notification} 
-        onClose={() => setNotification(null)} 
+      <BottomRightNotification
+        notification={notification}
+        onClose={() => setNotification(null)}
       />
 
       {/* Header */}
@@ -302,7 +357,7 @@ export default function DatabaseConnectionsDashboard() {
 
       {/* Action Bar */}
       <Box mb="xl">
-        <Flex justify="space-between" align="center" style={{ width: '100%' }}>
+        <Flex justify="space-between" align="center" style={{ width: "100%" }}>
           <Group>
             <Button
               leftSection={<IconRefresh size={16} />}
@@ -313,7 +368,8 @@ export default function DatabaseConnectionsDashboard() {
               Refresh
             </Button>
             <Badge variant="outline" radius={"sm"} size="md">
-              {connections.length} connection{connections.length !== 1 ? 's' : ''}
+              {connections.length} connection
+              {connections.length !== 1 ? "s" : ""}
             </Badge>
           </Group>
           <Button
@@ -326,11 +382,15 @@ export default function DatabaseConnectionsDashboard() {
       </Box>
 
       {/* Connections Table */}
-      <Paper shadow="sm" p="lg" pos="relative" style={{ width: '100%' }}>
+      <Paper shadow="sm" p="lg" pos="relative" style={{ width: "100%" }}>
         <LoadingOverlay visible={loading} />
-        
+
         {connections.length === 0 && !loading ? (
-          <Alert icon={<IconInfoCircle size={20} />} title="No connections found" color="blue">
+          <Alert
+            icon={<IconInfoCircle size={20} />}
+            title="No connections found"
+            color="blue"
+          >
             <Text>Get started by creating your first database connection.</Text>
           </Alert>
         ) : (
@@ -369,7 +429,7 @@ export default function DatabaseConnectionsDashboard() {
             required
             value={formData.postgres_host}
             onChange={(event) =>
-              handleFormDataChange('postgres_host', event.currentTarget.value)
+              handleFormDataChange("postgres_host", event.currentTarget.value)
             }
           />
 
@@ -381,7 +441,7 @@ export default function DatabaseConnectionsDashboard() {
             max={65535}
             value={formData.postgres_port}
             onChange={(value) =>
-              handleFormDataChange('postgres_port', String(value) || "5432")
+              handleFormDataChange("postgres_port", String(value) || "5432")
             }
           />
 
@@ -391,7 +451,10 @@ export default function DatabaseConnectionsDashboard() {
             required
             value={formData.postgres_db_name}
             onChange={(event) =>
-              handleFormDataChange('postgres_db_name', event.currentTarget.value)
+              handleFormDataChange(
+                "postgres_db_name",
+                event.currentTarget.value,
+              )
             }
           />
 
@@ -401,7 +464,7 @@ export default function DatabaseConnectionsDashboard() {
             required
             value={formData.postgres_user}
             onChange={(event) =>
-              handleFormDataChange('postgres_user', event.currentTarget.value)
+              handleFormDataChange("postgres_user", event.currentTarget.value)
             }
           />
 
@@ -411,7 +474,10 @@ export default function DatabaseConnectionsDashboard() {
             required
             value={formData.postgres_password}
             onChange={(event) =>
-              handleFormDataChange('postgres_password', event.currentTarget.value)
+              handleFormDataChange(
+                "postgres_password",
+                event.currentTarget.value,
+              )
             }
           />
 
@@ -452,7 +518,7 @@ export default function DatabaseConnectionsDashboard() {
       >
         <Stack gap="lg">
           <Text size="md">
-            Are you sure you want to delete the connection{' '}
+            Are you sure you want to delete the connection{" "}
             <Text span fw={600}>
               "{connectionToDelete?.name}"
             </Text>
@@ -461,18 +527,15 @@ export default function DatabaseConnectionsDashboard() {
           <Text size="sm" c="dimmed">
             This action cannot be undone.
           </Text>
-          
+
           <Group justify="flex-end" mt="lg">
-            <Button 
-              variant="subtle" 
+            <Button
+              variant="subtle"
               onClick={() => setConfirmModalOpened(false)}
             >
               Cancel
             </Button>
-            <Button 
-              color="red" 
-              onClick={confirmDelete}
-            >
+            <Button color="red" onClick={confirmDelete}>
               Delete Connection
             </Button>
           </Group>

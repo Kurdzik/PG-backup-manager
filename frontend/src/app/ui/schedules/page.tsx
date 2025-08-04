@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react";
 import {
-  Container,
+
   Title,
   Text,
   Button,
@@ -20,22 +20,22 @@ import {
   Flex,
   Alert,
   Box,
-  rem,
+
   Drawer,
-  Grid,
+
   Card,
-  Progress,
+
   SimpleGrid,
   Tooltip,
   Code,
-} from '@mantine/core';
+} from "@mantine/core";
 import {
   IconClock,
   IconPlus,
   IconEdit,
   IconTrash,
   IconRefresh,
-  IconCheck,
+
   IconX,
   IconInfoCircle,
   IconDatabase,
@@ -44,20 +44,21 @@ import {
   IconPlayerPlay,
   IconPlayerPause,
   IconActivity,
-  IconTrendingUp,
-  IconAlertTriangle,
+
   IconCheckbox,
   IconClockHour3,
   IconHistory,
-} from '@tabler/icons-react';
+} from "@tabler/icons-react";
 
 import { get, post, put, del } from "@/lib/backendRequests";
 import BottomRightNotification from "@/components/Notifications";
-import {NotificationData} from "@/components/Notifications";
-import {BackupDestination, DatabaseConnection, ApiResponse, BackupSchedule} from "@/lib/types"
-
-
-
+import { NotificationData } from "@/components/Notifications";
+import {
+  BackupDestination,
+  DatabaseConnection,
+  ApiResponse,
+  BackupSchedule,
+} from "@/lib/types";
 
 interface ScheduleFormData {
   connection_id: string;
@@ -66,7 +67,6 @@ interface ScheduleFormData {
   enabled: boolean;
 }
 
-
 interface ScheduleStats {
   total: number;
   enabled: number;
@@ -74,7 +74,6 @@ interface ScheduleStats {
   recentRuns: number;
   upcomingRuns: number;
 }
-
 
 const COMMON_SCHEDULES = [
   { value: "0 2 * * *", label: "Daily at 2:00 AM" },
@@ -93,8 +92,13 @@ export default function BackupScheduleDashboard() {
   const [loading, setLoading] = useState<boolean>(true);
   const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
   const [confirmModalOpened, setConfirmModalOpened] = useState<boolean>(false);
-  const [scheduleToDelete, setScheduleToDelete] = useState<{id: number, name: string} | null>(null);
-  const [editingSchedule, setEditingSchedule] = useState<BackupSchedule | null>(null);
+  const [scheduleToDelete, setScheduleToDelete] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
+  const [editingSchedule, setEditingSchedule] = useState<BackupSchedule | null>(
+    null,
+  );
   const [formData, setFormData] = useState<ScheduleFormData>({
     connection_id: "",
     destination_id: "",
@@ -102,7 +106,9 @@ export default function BackupScheduleDashboard() {
     enabled: true,
   });
   const [customSchedule, setCustomSchedule] = useState<string>("");
-  const [notification, setNotification] = useState<NotificationData | null>(null);
+  const [notification, setNotification] = useState<NotificationData | null>(
+    null,
+  );
   const [formLoading, setFormLoading] = useState<boolean>(false);
   const [stats, setStats] = useState<ScheduleStats>({
     total: 0,
@@ -120,7 +126,11 @@ export default function BackupScheduleDashboard() {
     calculateStats();
   }, [schedules]);
 
-  const showNotification = (type: 'success' | 'error', title: string, message: string): void => {
+  const showNotification = (
+    type: "success" | "error",
+    title: string,
+    message: string,
+  ): void => {
     setNotification({ type, title, message });
     setTimeout(() => setNotification(null), 5000);
   };
@@ -128,17 +138,21 @@ export default function BackupScheduleDashboard() {
   const loadData = async (): Promise<void> => {
     try {
       setLoading(true);
-      const [connectionsRes, destinationsRes, schedulesRes] = await Promise.all([
-        get("connections/list") as Promise<ApiResponse<DatabaseConnection[]>>,
-        get("backup-destinations/s3/list") as Promise<ApiResponse<BackupDestination[]>>,
-        get("schedules/list") as Promise<ApiResponse<BackupSchedule[]>>
-      ]);
-      
+      const [connectionsRes, destinationsRes, schedulesRes] = await Promise.all(
+        [
+          get("connections/list") as Promise<ApiResponse<DatabaseConnection[]>>,
+          get("backup-destinations/s3/list") as Promise<
+            ApiResponse<BackupDestination[]>
+          >,
+          get("schedules/list") as Promise<ApiResponse<BackupSchedule[]>>,
+        ],
+      );
+
       setConnections(connectionsRes.data || []);
       setDestinations(destinationsRes.data || []);
       setSchedules(schedulesRes.data || []);
     } catch (err) {
-      showNotification('error', 'Error', 'Failed to load data');
+      showNotification("error", "Error", "Failed to load data");
       console.error("Error loading data:", err);
     } finally {
       setLoading(false);
@@ -152,13 +166,13 @@ export default function BackupScheduleDashboard() {
 
     const newStats: ScheduleStats = {
       total: schedules.length,
-      enabled: schedules.filter(s => s.enabled).length,
-      disabled: schedules.filter(s => !s.enabled).length,
-      recentRuns: schedules.filter(s => 
-        s.last_run && new Date(s.last_run) >= oneDayAgo
+      enabled: schedules.filter((s) => s.enabled).length,
+      disabled: schedules.filter((s) => !s.enabled).length,
+      recentRuns: schedules.filter(
+        (s) => s.last_run && new Date(s.last_run) >= oneDayAgo,
       ).length,
-      upcomingRuns: schedules.filter(s => 
-        s.next_run && new Date(s.next_run) <= oneDayFromNow && s.enabled
+      upcomingRuns: schedules.filter(
+        (s) => s.next_run && new Date(s.next_run) <= oneDayFromNow && s.enabled,
       ).length,
     };
 
@@ -169,27 +183,42 @@ export default function BackupScheduleDashboard() {
     try {
       setFormLoading(true);
       let response: ApiResponse;
-      
-      const scheduleValue = formData.schedule === 'custom' ? customSchedule : formData.schedule;
+
+      const scheduleValue =
+        formData.schedule === "custom" ? customSchedule : formData.schedule;
       const payload = {
         ...formData,
         schedule: scheduleValue,
       };
-      
+
       if (editingSchedule) {
-        response = await put(`schedules/update?schedule_id=${editingSchedule.id}`, payload);
+        response = await put(
+          `schedules/update?schedule_id=${editingSchedule.id}`,
+          payload,
+        );
       } else {
         response = await post("schedules/create", payload);
       }
-      
-      if (response.status?.includes("successfully") || response.status === "OK") {
-        showNotification('success', 'Success', `Schedule ${editingSchedule ? 'updated' : 'created'} successfully`);
+
+      if (
+        response.status?.includes("successfully") ||
+        response.status === "OK"
+      ) {
+        showNotification(
+          "success",
+          "Success",
+          `Schedule ${editingSchedule ? "updated" : "created"} successfully`,
+        );
         setDrawerOpened(false);
         resetForm();
         loadData();
       }
     } catch (err) {
-      showNotification('error', 'Error', `Failed to ${editingSchedule ? 'update' : 'create'} schedule`);
+      showNotification(
+        "error",
+        "Error",
+        `Failed to ${editingSchedule ? "update" : "create"} schedule`,
+      );
       console.error("Error submitting form:", err);
     } finally {
       setFormLoading(false);
@@ -197,23 +226,25 @@ export default function BackupScheduleDashboard() {
   };
 
   const handleDelete = async (scheduleId: number): Promise<void> => {
-    const schedule = schedules.find(s => s.id === scheduleId);
-    const name = schedule ? 
-      `${getConnectionName(schedule.connection_id)} → ${getDestinationName(schedule.destination_id)}` : 
-      'Unknown Schedule';
+    const schedule = schedules.find((s) => s.id === scheduleId);
+    const name = schedule
+      ? `${getConnectionName(schedule.connection_id)} → ${getDestinationName(schedule.destination_id)}`
+      : "Unknown Schedule";
     setScheduleToDelete({ id: scheduleId, name });
     setConfirmModalOpened(true);
   };
 
   const confirmDelete = async (): Promise<void> => {
     if (!scheduleToDelete) return;
-    
+
     try {
-      const response: ApiResponse = await del(`schedules/delete?schedule_id=${scheduleToDelete.id}`);
-      showNotification('success', 'Success', 'Schedule deleted successfully');
+      const response: ApiResponse = await del(
+        `schedules/delete?schedule_id=${scheduleToDelete.id}`,
+      );
+      showNotification("success", "Success", "Schedule deleted successfully");
       loadData();
     } catch (err) {
-      showNotification('error', 'Error', 'Failed to delete schedule');
+      showNotification("error", "Error", "Failed to delete schedule");
       console.error("Error deleting schedule:", err);
     } finally {
       setConfirmModalOpened(false);
@@ -221,14 +252,27 @@ export default function BackupScheduleDashboard() {
     }
   };
 
-  const handleToggleEnabled = async (scheduleId: number, enabled: boolean): Promise<void> => {
+  const handleToggleEnabled = async (
+    scheduleId: number,
+    enabled: boolean,
+  ): Promise<void> => {
     try {
-      const endpoint = enabled ? `schedules/enable?schedule_id=${scheduleId}` : `schedules/disable?schedule_id=${scheduleId}`;
+      const endpoint = enabled
+        ? `schedules/enable?schedule_id=${scheduleId}`
+        : `schedules/disable?schedule_id=${scheduleId}`;
       await post(endpoint, {});
-      showNotification('success', 'Success', `Schedule ${enabled ? 'enabled' : 'disabled'} successfully`);
+      showNotification(
+        "success",
+        "Success",
+        `Schedule ${enabled ? "enabled" : "disabled"} successfully`,
+      );
       loadData();
     } catch (err) {
-      showNotification('error', 'Error', `Failed to ${enabled ? 'enable' : 'disable'} schedule`);
+      showNotification(
+        "error",
+        "Error",
+        `Failed to ${enabled ? "enable" : "disable"} schedule`,
+      );
       console.error("Error toggling schedule:", err);
     }
   };
@@ -241,21 +285,23 @@ export default function BackupScheduleDashboard() {
 
   const openEditDrawer = (schedule: BackupSchedule): void => {
     setEditingSchedule(schedule);
-    
+
     // Check if schedule matches a common pattern
-    const commonSchedule = COMMON_SCHEDULES.find(cs => cs.value === schedule.schedule);
-    
+    const commonSchedule = COMMON_SCHEDULES.find(
+      (cs) => cs.value === schedule.schedule,
+    );
+
     setFormData({
       connection_id: schedule.connection_id.toString(),
       destination_id: schedule.destination_id.toString(),
-      schedule: commonSchedule ? schedule.schedule : 'custom',
+      schedule: commonSchedule ? schedule.schedule : "custom",
       enabled: schedule.enabled,
     });
-    
+
     if (!commonSchedule) {
       setCustomSchedule(schedule.schedule);
     }
-    
+
     setDrawerOpened(true);
   };
 
@@ -277,25 +323,25 @@ export default function BackupScheduleDashboard() {
 
   const formatDate = (dateString?: string): string => {
     if (!dateString || dateString === "0001-01-01T00:00:00Z") return "Never";
-    return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(dateString).toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const formatRelativeTime = (dateString?: string): string => {
     if (!dateString || dateString === "0001-01-01T00:00:00Z") return "Never";
-    
+
     const date = new Date(dateString);
     const now = new Date();
     const diffMs = date.getTime() - now.getTime();
     const diffMins = Math.round(diffMs / (1000 * 60));
     const diffHours = Math.round(diffMs / (1000 * 60 * 60));
     const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
-    
+
     if (Math.abs(diffMins) < 60) {
       return diffMins > 0 ? `in ${diffMins}m` : `${Math.abs(diffMins)}m ago`;
     } else if (Math.abs(diffHours) < 24) {
@@ -307,13 +353,14 @@ export default function BackupScheduleDashboard() {
 
   const handleFormDataChange = <K extends keyof ScheduleFormData>(
     field: K,
-    value: ScheduleFormData[K]
+    value: ScheduleFormData[K],
   ): void => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const isFormValid = (): boolean => {
-    const scheduleValue = formData.schedule === 'custom' ? customSchedule : formData.schedule;
+    const scheduleValue =
+      formData.schedule === "custom" ? customSchedule : formData.schedule;
     return !!(
       formData.connection_id &&
       formData.destination_id &&
@@ -322,38 +369,47 @@ export default function BackupScheduleDashboard() {
   };
 
   const getConnectionName = (connectionId: number): string => {
-    const connection = connections.find(c => c.id === connectionId);
-    return connection ? `${connection.postgres_db_name} (${connection.postgres_host})` : 'Unknown';
+    const connection = connections.find((c) => c.id === connectionId);
+    return connection
+      ? `${connection.postgres_db_name} (${connection.postgres_host})`
+      : "Unknown";
   };
 
   const getDestinationName = (destinationId: number): string => {
-    const destination = destinations.find(d => d.id === destinationId);
-    return destination ? destination.name : 'Unknown';
+    const destination = destinations.find((d) => d.id === destinationId);
+    return destination ? destination.name : "Unknown";
   };
 
   const getAvailableDestinations = () => {
     if (!formData.connection_id) return [];
     const connectionId = parseInt(formData.connection_id);
-    return destinations.filter(d => d.connection_id === connectionId);
+    return destinations.filter((d) => d.connection_id === connectionId);
   };
 
-  const connectionOptions = connections.map(conn => ({
+  const connectionOptions = connections.map((conn) => ({
     value: conn.id.toString(),
-    label: `${conn.postgres_db_name} (${conn.postgres_host})`
+    label: `${conn.postgres_db_name} (${conn.postgres_host})`,
   }));
 
-  const destinationOptions = getAvailableDestinations().map(dest => ({
+  const destinationOptions = getAvailableDestinations().map((dest) => ({
     value: dest.id.toString(),
-    label: dest.name
+    label: dest.name,
   }));
 
   const rows = schedules.map((schedule: BackupSchedule) => (
     <Table.Tr key={schedule.id}>
       <Table.Td>
         <Flex align="center" gap="sm">
-          <IconClock size={18} color={schedule.enabled ? "#495057" : "#adb5bd"} />
+          <IconClock
+            size={18}
+            color={schedule.enabled ? "#495057" : "#adb5bd"}
+          />
           <Box>
-            <Text fw={500} size="md" c={schedule.enabled ? undefined : "dimmed"}>
+            <Text
+              fw={500}
+              size="md"
+              c={schedule.enabled ? undefined : "dimmed"}
+            >
               {getConnectionName(schedule.connection_id)}
             </Text>
             <Text size="xs" c="dimmed">
@@ -364,14 +420,12 @@ export default function BackupScheduleDashboard() {
       </Table.Td>
       <Table.Td>
         <Tooltip label={schedule.schedule}>
-          <Code style={{ cursor: 'help' }}>
-            {schedule.schedule}
-          </Code>
+          <Code style={{ cursor: "help" }}>{schedule.schedule}</Code>
         </Tooltip>
       </Table.Td>
       <Table.Td>
-        <Badge 
-          variant={schedule.enabled ? "outline" : "outline"} 
+        <Badge
+          variant={schedule.enabled ? "outline" : "outline"}
           color={schedule.enabled ? "success" : "slate"}
           size="sm"
           radius="sm"
@@ -383,7 +437,9 @@ export default function BackupScheduleDashboard() {
         <Flex direction="column" gap={2}>
           <Text size="sm">{formatDate(schedule.last_run)}</Text>
           {schedule.last_run && (
-            <Text size="xs" c="dimmed">{formatRelativeTime(schedule.last_run)}</Text>
+            <Text size="xs" c="dimmed">
+              {formatRelativeTime(schedule.last_run)}
+            </Text>
           )}
         </Flex>
       </Table.Td>
@@ -391,7 +447,9 @@ export default function BackupScheduleDashboard() {
         <Flex direction="column" gap={2}>
           <Text size="sm">{formatDate(schedule.next_run)}</Text>
           {schedule.next_run && schedule.enabled && (
-            <Text size="xs" c="dimmed">{formatRelativeTime(schedule.next_run)}</Text>
+            <Text size="xs" c="dimmed">
+              {formatRelativeTime(schedule.next_run)}
+            </Text>
           )}
         </Flex>
       </Table.Td>
@@ -401,10 +459,16 @@ export default function BackupScheduleDashboard() {
             <ActionIcon
               variant="outline"
               color={schedule.enabled ? "warning" : "success"}
-              onClick={() => handleToggleEnabled(schedule.id, !schedule.enabled)}
-              aria-label={`${schedule.enabled ? 'Disable' : 'Enable'} schedule`}
+              onClick={() =>
+                handleToggleEnabled(schedule.id, !schedule.enabled)
+              }
+              aria-label={`${schedule.enabled ? "Disable" : "Enable"} schedule`}
             >
-              {schedule.enabled ? <IconPlayerPause size={16} /> : <IconPlayerPlay size={16} />}
+              {schedule.enabled ? (
+                <IconPlayerPause size={16} />
+              ) : (
+                <IconPlayerPlay size={16} />
+              )}
             </ActionIcon>
           </Tooltip>
           <ActionIcon
@@ -428,11 +492,11 @@ export default function BackupScheduleDashboard() {
   ));
 
   return (
-    <Box style={{ width: '90%', margin: '0 auto', padding: '2rem 0' }}>
+    <Box style={{ width: "90%", margin: "0 auto", padding: "2rem 0" }}>
       {/* Bottom-right notification */}
-      <BottomRightNotification 
-        notification={notification} 
-        onClose={() => setNotification(null)} 
+      <BottomRightNotification
+        notification={notification}
+        onClose={() => setNotification(null)}
       />
 
       {/* Header */}
@@ -456,8 +520,12 @@ export default function BackupScheduleDashboard() {
           <Flex align="center" gap="md">
             <IconActivity size={24} color="grey" />
             <Box>
-              <Text size="lg" fw={600}>{stats.total}</Text>
-              <Text size="sm" c="dimmed">Total Schedules</Text>
+              <Text size="lg" fw={600}>
+                {stats.total}
+              </Text>
+              <Text size="sm" c="dimmed">
+                Total Schedules
+              </Text>
             </Box>
           </Flex>
         </Card>
@@ -466,8 +534,12 @@ export default function BackupScheduleDashboard() {
           <Flex align="center" gap="md">
             <IconCheckbox size={24} color="green" />
             <Box>
-              <Text size="lg" fw={600}>{stats.enabled}</Text>
-              <Text size="sm" c="dimmed">Enabled</Text>
+              <Text size="lg" fw={600}>
+                {stats.enabled}
+              </Text>
+              <Text size="sm" c="dimmed">
+                Enabled
+              </Text>
             </Box>
           </Flex>
         </Card>
@@ -476,28 +548,40 @@ export default function BackupScheduleDashboard() {
           <Flex align="center" gap="md">
             <IconX size={24} color="grey" />
             <Box>
-              <Text size="lg" fw={600}>{stats.disabled}</Text>
-              <Text size="sm" c="dimmed">Disabled</Text>
+              <Text size="lg" fw={600}>
+                {stats.disabled}
+              </Text>
+              <Text size="sm" c="dimmed">
+                Disabled
+              </Text>
             </Box>
           </Flex>
         </Card>
 
         <Card shadow="sm" padding="lg" radius="md" withBorder>
           <Flex align="center" gap="md">
-            <IconHistory size={24} color="grey"/>
+            <IconHistory size={24} color="grey" />
             <Box>
-              <Text size="lg" fw={600}>{stats.recentRuns}</Text>
-              <Text size="sm" c="dimmed">Ran Today</Text>
+              <Text size="lg" fw={600}>
+                {stats.recentRuns}
+              </Text>
+              <Text size="sm" c="dimmed">
+                Ran Today
+              </Text>
             </Box>
           </Flex>
         </Card>
 
         <Card shadow="sm" padding="lg" radius="md" withBorder>
           <Flex align="center" gap="md">
-            <IconClockHour3 size={24} color="grey"/>
+            <IconClockHour3 size={24} color="grey" />
             <Box>
-              <Text size="lg" fw={600}>{stats.upcomingRuns}</Text>
-              <Text size="sm" c="dimmed">Due Soon</Text>
+              <Text size="lg" fw={600}>
+                {stats.upcomingRuns}
+              </Text>
+              <Text size="sm" c="dimmed">
+                Due Soon
+              </Text>
             </Box>
           </Flex>
         </Card>
@@ -505,7 +589,7 @@ export default function BackupScheduleDashboard() {
 
       {/* Action Bar */}
       <Box mb="xl">
-        <Flex justify="space-between" align="center" style={{ width: '100%' }}>
+        <Flex justify="space-between" align="center" style={{ width: "100%" }}>
           <Group>
             <Button
               leftSection={<IconRefresh size={16} />}
@@ -516,7 +600,7 @@ export default function BackupScheduleDashboard() {
               Refresh
             </Button>
             <Badge variant="outline" radius={"sm"} size="md">
-              {schedules.length} schedule{schedules.length !== 1 ? 's' : ''}
+              {schedules.length} schedule{schedules.length !== 1 ? "s" : ""}
             </Badge>
           </Group>
           <Button
@@ -529,12 +613,18 @@ export default function BackupScheduleDashboard() {
       </Box>
 
       {/* Schedules Table */}
-      <Paper shadow="sm" p="lg" pos="relative" style={{ width: '100%' }}>
+      <Paper shadow="sm" p="lg" pos="relative" style={{ width: "100%" }}>
         <LoadingOverlay visible={loading} />
-        
+
         {schedules.length === 0 && !loading ? (
-          <Alert icon={<IconInfoCircle size={20} />} title="No backup schedules found" color="blue">
-            <Text>Get started by creating your first automated backup schedule.</Text>
+          <Alert
+            icon={<IconInfoCircle size={20} />}
+            title="No backup schedules found"
+            color="blue"
+          >
+            <Text>
+              Get started by creating your first automated backup schedule.
+            </Text>
           </Alert>
         ) : (
           <Table striped highlightOnHover>
@@ -559,7 +649,9 @@ export default function BackupScheduleDashboard() {
         onClose={closeDrawer}
         title={
           <Text fw={600} size="lg">
-            {editingSchedule ? "Edit Backup Schedule" : "Create New Backup Schedule"}
+            {editingSchedule
+              ? "Edit Backup Schedule"
+              : "Create New Backup Schedule"}
           </Text>
         }
         position="left"
@@ -574,8 +666,8 @@ export default function BackupScheduleDashboard() {
             data={connectionOptions}
             value={formData.connection_id}
             onChange={(value) => {
-              handleFormDataChange('connection_id', value || "");
-              handleFormDataChange('destination_id', ""); // Reset destination when connection changes
+              handleFormDataChange("connection_id", value || "");
+              handleFormDataChange("destination_id", ""); // Reset destination when connection changes
             }}
             leftSection={<IconDatabase size={16} />}
             disabled={!!editingSchedule}
@@ -588,7 +680,7 @@ export default function BackupScheduleDashboard() {
             data={destinationOptions}
             value={formData.destination_id}
             onChange={(value) =>
-              handleFormDataChange('destination_id', value || "")
+              handleFormDataChange("destination_id", value || "")
             }
             leftSection={<IconCloud size={16} />}
             disabled={!formData.connection_id || !!editingSchedule}
@@ -600,21 +692,17 @@ export default function BackupScheduleDashboard() {
             required
             data={COMMON_SCHEDULES}
             value={formData.schedule}
-            onChange={(value) =>
-              handleFormDataChange('schedule', value || "")
-            }
+            onChange={(value) => handleFormDataChange("schedule", value || "")}
             leftSection={<IconClock size={16} />}
           />
 
-          {formData.schedule === 'custom' && (
+          {formData.schedule === "custom" && (
             <TextInput
               label="Custom Cron Expression"
               placeholder="0 2 * * * (every day at 2 AM)"
               required
               value={customSchedule}
-              onChange={(event) =>
-                setCustomSchedule(event.currentTarget.value)
-              }
+              onChange={(event) => setCustomSchedule(event.currentTarget.value)}
               description="Use standard cron format: minute hour day month weekday"
             />
           )}
@@ -624,7 +712,7 @@ export default function BackupScheduleDashboard() {
             description="Schedule will run automatically when enabled"
             checked={formData.enabled}
             onChange={(event) =>
-              handleFormDataChange('enabled', event.currentTarget.checked)
+              handleFormDataChange("enabled", event.currentTarget.checked)
             }
           />
 
@@ -654,7 +742,7 @@ export default function BackupScheduleDashboard() {
       >
         <Stack gap="lg">
           <Text size="md">
-            Are you sure you want to delete the backup schedule for{' '}
+            Are you sure you want to delete the backup schedule for{" "}
             <Text span fw={600}>
               "{scheduleToDelete?.name}"
             </Text>
@@ -663,18 +751,15 @@ export default function BackupScheduleDashboard() {
           <Text size="sm" c="dimmed">
             This action cannot be undone. Future automated backups will not run.
           </Text>
-          
+
           <Group justify="flex-end" mt="lg">
-            <Button 
-              variant="subtle" 
+            <Button
+              variant="subtle"
               onClick={() => setConfirmModalOpened(false)}
             >
               Cancel
             </Button>
-            <Button 
-              color="red" 
-              onClick={confirmDelete}
-            >
+            <Button color="red" onClick={confirmDelete}>
               Delete Schedule
             </Button>
           </Group>

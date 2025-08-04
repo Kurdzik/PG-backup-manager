@@ -30,9 +30,9 @@ const createHeaders = (secure: boolean = true): Record<string, string> => {
 const handleResponse = async (response: Response) => {
   if (response.status === 401) {
     handleUnauthorized();
-    throw new Error('Unauthorized - redirecting to login');
+    throw new Error("Unauthorized - redirecting to login");
   }
-  
+
   return response.json();
 };
 
@@ -45,12 +45,16 @@ export async function get(endpoint: string, secure: boolean = true) {
 
   return fetch(url, options)
     .then(handleResponse)
-    .catch(err => {
+    .catch((err) => {
       throw err;
     });
 }
 
-export async function post(endpoint: string, requestBody?: any, secure: boolean = true) {
+export async function post(
+  endpoint: string,
+  requestBody?: any,
+  secure: boolean = true,
+) {
   const url = `${conf.backendUrl}/api/${conf.apiVersion}/${endpoint}`;
   const options = {
     method: "POST",
@@ -60,12 +64,16 @@ export async function post(endpoint: string, requestBody?: any, secure: boolean 
 
   return fetch(url, options)
     .then(handleResponse)
-    .catch(err => {
+    .catch((err) => {
       throw err;
     });
 }
 
-export async function put(endpoint: string, requestBody?: any, secure: boolean = true) {
+export async function put(
+  endpoint: string,
+  requestBody?: any,
+  secure: boolean = true,
+) {
   const url = `${conf.backendUrl}/api/${conf.apiVersion}/${endpoint}`;
   const options = {
     method: "PUT",
@@ -75,7 +83,7 @@ export async function put(endpoint: string, requestBody?: any, secure: boolean =
 
   return fetch(url, options)
     .then(handleResponse)
-    .catch(err => {
+    .catch((err) => {
       throw err;
     });
 }
@@ -89,7 +97,7 @@ export async function del(endpoint: string, secure: boolean = true) {
 
   return fetch(url, options)
     .then(handleResponse)
-    .catch(err => {
+    .catch((err) => {
       throw err;
     });
 }

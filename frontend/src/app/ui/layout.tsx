@@ -5,7 +5,6 @@ import { Box, Grid, Paper } from "@mantine/core";
 import React from "react";
 import { SidebarComponent } from "@/components/Sidebar";
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export default function UILayout({ children }: { children: any }) {
   return (
     <Box
@@ -50,4 +49,3 @@ export default function UILayout({ children }: { children: any }) {
     </Box>
   );
 }
-

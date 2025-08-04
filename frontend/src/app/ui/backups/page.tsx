@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react";
 import {
@@ -17,22 +17,21 @@ import {
   Flex,
   Alert,
   Box,
-  rem,
+
   Card,
   Grid,
-  Progress,
+
   Divider,
-  Container,
+
   SimpleGrid,
-} from '@mantine/core';
+} from "@mantine/core";
 import {
   IconDatabase,
-  IconDownload,
+
   IconHistory,
   IconTrash,
   IconRefresh,
-  IconCheck,
-  IconX,
+
   IconInfoCircle,
   IconChartLine,
   IconCloudUpload,
@@ -41,12 +40,24 @@ import {
   IconClock,
   IconAlertTriangle,
   IconArchive,
-} from '@tabler/icons-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+} from "@tabler/icons-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import BottomRightNotification from "@/components/Notifications";
-import {NotificationData} from "@/components/Notifications";
-import { get, post, put, del } from "@/lib/backendRequests";
-import {BackupDestination, DatabaseConnection, ApiResponse} from "@/lib/types"
+import { NotificationData } from "@/components/Notifications";
+import { get, post, del } from "@/lib/backendRequests";
+import {
+  BackupDestination,
+  DatabaseConnection,
+  ApiResponse,
+} from "@/lib/types";
 
 interface BackupFile {
   filename: string;
@@ -61,20 +72,18 @@ interface BackupStats {
   backupsToday: number;
 }
 
-
-
 interface ChartDataPoint {
   date: string;
   count: number;
   fullDate: Date;
 }
 
-
-
 export default function BackupManagerDashboard() {
   const [connections, setConnections] = useState<DatabaseConnection[]>([]);
   const [selectedDatabase, setSelectedDatabase] = useState<string | null>(null);
-  const [backupDestinations, setBackupDestinations] = useState<BackupDestination[]>([]);
+  const [backupDestinations, setBackupDestinations] = useState<
+    BackupDestination[]
+  >([]);
   const [backupDestination, setBackupDestination] = useState<string>("");
   const [backups, setBackups] = useState<BackupFile[]>([]);
   const [stats, setStats] = useState<BackupStats>({
@@ -85,14 +94,20 @@ export default function BackupManagerDashboard() {
   });
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [destinationsLoading, setDestinationsLoading] = useState<boolean>(false);
+  const [destinationsLoading, setDestinationsLoading] =
+    useState<boolean>(false);
   const [backupsLoading, setBackupsLoading] = useState<boolean>(false);
-  const [createBackupLoading, setCreateBackupLoading] = useState<boolean>(false);
+  const [createBackupLoading, setCreateBackupLoading] =
+    useState<boolean>(false);
   const [restoreModalOpened, setRestoreModalOpened] = useState<boolean>(false);
   const [deleteModalOpened, setDeleteModalOpened] = useState<boolean>(false);
-  const [selectedBackupFile, setSelectedBackupFile] = useState<string | null>(null);
-  const [actionType, setActionType] = useState<'restore' | 'delete'>('restore');
-  const [notification, setNotification] = useState<NotificationData | null>(null);
+  const [selectedBackupFile, setSelectedBackupFile] = useState<string | null>(
+    null,
+  );
+  const [actionType, setActionType] = useState<"restore" | "delete">("restore");
+  const [notification, setNotification] = useState<NotificationData | null>(
+    null,
+  );
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -111,7 +126,11 @@ export default function BackupManagerDashboard() {
     }
   }, [selectedDatabase, backupDestination]);
 
-  const showNotification = (type: 'success' | 'error', title: string, message: string): void => {
+  const showNotification = (
+    type: "success" | "error",
+    title: string,
+    message: string,
+  ): void => {
     setNotification({ type, title, message });
     setTimeout(() => setNotification(null), 5000);
   };
@@ -119,16 +138,17 @@ export default function BackupManagerDashboard() {
   const loadConnections = async (): Promise<void> => {
     try {
       setLoading(true);
-      const response: ApiResponse<DatabaseConnection[]> = await get("connections/list");
+      const response: ApiResponse<DatabaseConnection[]> =
+        await get("connections/list");
       const connectionsList = response.data || [];
       setConnections(connectionsList);
-      
+
       // Auto-select first database if available
       if (connectionsList.length > 0 && !selectedDatabase) {
         setSelectedDatabase(connectionsList[0].id.toString());
       }
     } catch (err) {
-      showNotification('error', 'Error', 'Failed to load database connections');
+      showNotification("error", "Error", "Failed to load database connections");
       console.error("Error loading connections:", err);
     } finally {
       setLoading(false);
@@ -137,15 +157,16 @@ export default function BackupManagerDashboard() {
 
   const loadBackupDestinations = async (): Promise<void> => {
     if (!selectedDatabase) return;
-    
+
     try {
       setDestinationsLoading(true);
-      const response: ApiResponse<BackupDestination[]> = await get(`backup-destinations/s3/list?connection_id=${selectedDatabase}`);
+      const response: ApiResponse<BackupDestination[]> = await get(
+        `backup-destinations/s3/list?connection_id=${selectedDatabase}`,
+      );
       const destinations = response.data || [];
       setBackupDestinations(destinations);
-      
     } catch (err) {
-      showNotification('error', 'Error', 'Failed to load backup destinations');
+      showNotification("error", "Error", "Failed to load backup destinations");
       console.error("Error loading backup destinations:", err);
       setBackupDestinations([]);
     } finally {
@@ -159,14 +180,14 @@ export default function BackupManagerDashboard() {
     if (match) {
       const dateStr = match[1]; // YYYYMMDD
       const timeStr = match[2]; // HHMMSS
-      
+
       const year = parseInt(dateStr.substring(0, 4));
       const month = parseInt(dateStr.substring(4, 6)) - 1; // JS months are 0-indexed
       const day = parseInt(dateStr.substring(6, 8));
       const hour = parseInt(timeStr.substring(0, 2));
       const minute = parseInt(timeStr.substring(2, 4));
       const second = parseInt(timeStr.substring(4, 6));
-      
+
       return new Date(year, month, day, hour, minute, second);
     }
     return new Date(); // fallback
@@ -176,18 +197,19 @@ export default function BackupManagerDashboard() {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    
-    const backupsToday = backupFiles.filter(backup => 
-      backup.timestamp >= today
+
+    const backupsToday = backupFiles.filter(
+      (backup) => backup.timestamp >= today,
     ).length;
-    
-    const backupsThisMonth = backupFiles.filter(backup => 
-      backup.timestamp >= thisMonth
+
+    const backupsThisMonth = backupFiles.filter(
+      (backup) => backup.timestamp >= thisMonth,
     ).length;
-    
-    const lastBackup = backupFiles.length > 0 
-      ? new Date(Math.max(...backupFiles.map(b => b.timestamp.getTime())))
-      : null;
+
+    const lastBackup =
+      backupFiles.length > 0
+        ? new Date(Math.max(...backupFiles.map((b) => b.timestamp.getTime())))
+        : null;
 
     return {
       totalBackups: backupFiles.length,
@@ -202,35 +224,40 @@ export default function BackupManagerDashboard() {
 
     // Group backups by date
     const dateGroups = new Map<string, number>();
-    
-    backupFiles.forEach(backup => {
-      const dateStr = backup.timestamp.toISOString().split('T')[0]; // YYYY-MM-DD
+
+    backupFiles.forEach((backup) => {
+      const dateStr = backup.timestamp.toISOString().split("T")[0]; // YYYY-MM-DD
       dateGroups.set(dateStr, (dateGroups.get(dateStr) || 0) + 1);
     });
 
     // Get the date range (last 30 days or from first backup, whichever is shorter)
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const firstBackupDate = backupFiles.length > 0 
-      ? new Date(Math.min(...backupFiles.map(b => b.timestamp.getTime())))
-      : now;
-    
-    const startDate = firstBackupDate > thirtyDaysAgo ? firstBackupDate : thirtyDaysAgo;
-    
+    const firstBackupDate =
+      backupFiles.length > 0
+        ? new Date(Math.min(...backupFiles.map((b) => b.timestamp.getTime())))
+        : now;
+
+    const startDate =
+      firstBackupDate > thirtyDaysAgo ? firstBackupDate : thirtyDaysAgo;
+
     // Create data points for each day
     const chartData: ChartDataPoint[] = [];
     const currentDate = new Date(startDate);
-    
+
     while (currentDate <= now) {
-      const dateStr = currentDate.toISOString().split('T')[0];
+      const dateStr = currentDate.toISOString().split("T")[0];
       const count = dateGroups.get(dateStr) || 0;
-      
+
       chartData.push({
-        date: currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        date: currentDate.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        }),
         count,
-        fullDate: new Date(currentDate)
+        fullDate: new Date(currentDate),
       });
-      
+
       currentDate.setDate(currentDate.getDate() + 1);
     }
 
@@ -239,27 +266,36 @@ export default function BackupManagerDashboard() {
 
   const loadBackups = async (): Promise<void> => {
     if (!selectedDatabase || !backupDestination) return;
-    
+
     try {
       setBackupsLoading(true);
-      const response: ApiResponse = await get(`backup/list?database_id=${selectedDatabase}&backup_destination=${backupDestination}`);
-      
-      const backupFiles: BackupFile[] = (response.payload || []).map(filename => ({
-        filename,
-        timestamp: parseBackupTimestamp(filename),
-      }));
-      
+      const response: ApiResponse = await get(
+        `backup/list?database_id=${selectedDatabase}&backup_destination=${backupDestination}`,
+      );
+
+      const backupFiles: BackupFile[] = (response.payload || []).map(
+        (filename) => ({
+          filename,
+          timestamp: parseBackupTimestamp(filename),
+        }),
+      );
+
       // Sort by timestamp descending (newest first)
       backupFiles.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-      
+
       setBackups(backupFiles);
       setStats(calculateStats(backupFiles));
       setChartData(generateChartData(backupFiles));
     } catch (err) {
-      showNotification('error', 'Error', 'Failed to load backups');
+      showNotification("error", "Error", "Failed to load backups");
       console.error("Error loading backups:", err);
       setBackups([]);
-      setStats({ totalBackups: 0, lastBackup: null, backupsThisMonth: 0, backupsToday: 0 });
+      setStats({
+        totalBackups: 0,
+        lastBackup: null,
+        backupsThisMonth: 0,
+        backupsToday: 0,
+      });
       setChartData([]);
     } finally {
       setBackupsLoading(false);
@@ -268,20 +304,20 @@ export default function BackupManagerDashboard() {
 
   const createBackup = async (): Promise<void> => {
     if (!selectedDatabase) return;
-    
+
     try {
       setCreateBackupLoading(true);
       const response: ApiResponse = await post("backup/create", {
         database_id: selectedDatabase,
         backup_destination: backupDestination,
       });
-      
-      if (response.status === 'OK') {
-        showNotification('success', 'Success', 'Backup created successfully');
+
+      if (response.status === "OK") {
+        showNotification("success", "Success", "Backup created successfully");
         loadBackups(); // Refresh the backup list
       }
     } catch (err) {
-      showNotification('error', 'Error', 'Failed to create backup');
+      showNotification("error", "Error", "Failed to create backup");
       console.error("Error creating backup:", err);
     } finally {
       setCreateBackupLoading(false);
@@ -290,19 +326,23 @@ export default function BackupManagerDashboard() {
 
   const handleRestore = async (): Promise<void> => {
     if (!selectedDatabase || !selectedBackupFile) return;
-    
+
     try {
       const response: ApiResponse = await post("backup/restore", {
         database_id: selectedDatabase,
         backup_destination: backupDestination,
         backup_filename: selectedBackupFile,
       });
-      
-      if (response.status === 'OK') {
-        showNotification('success', 'Success', 'Database restored successfully');
+
+      if (response.status === "OK") {
+        showNotification(
+          "success",
+          "Success",
+          "Database restored successfully",
+        );
       }
     } catch (err) {
-      showNotification('error', 'Error', 'Failed to restore database');
+      showNotification("error", "Error", "Failed to restore database");
       console.error("Error restoring database:", err);
     } finally {
       setRestoreModalOpened(false);
@@ -312,17 +352,19 @@ export default function BackupManagerDashboard() {
 
   const handleDelete = async (): Promise<void> => {
     if (!selectedDatabase || !selectedBackupFile) return;
-    
+
     try {
       setDeleteLoading(true);
-      const response: ApiResponse = await del(`backup/delete?database_id=${selectedDatabase}&destination=${backupDestination}&filename=${selectedBackupFile}`);
-      
-      if (response.status === 'OK') {
-        showNotification('success', 'Success', 'Backup deleted successfully');
+      const response: ApiResponse = await del(
+        `backup/delete?database_id=${selectedDatabase}&destination=${backupDestination}&filename=${selectedBackupFile}`,
+      );
+
+      if (response.status === "OK") {
+        showNotification("success", "Success", "Backup deleted successfully");
         loadBackups(); // Refresh the backup list
       }
     } catch (err) {
-      showNotification('error', 'Error', 'Failed to delete backup');
+      showNotification("error", "Error", "Failed to delete backup");
       console.error("Error deleting backup:", err);
     } finally {
       setDeleteLoading(false);
@@ -333,35 +375,39 @@ export default function BackupManagerDashboard() {
 
   const openRestoreModal = (filename: string): void => {
     setSelectedBackupFile(filename);
-    setActionType('restore');
+    setActionType("restore");
     setRestoreModalOpened(true);
   };
 
   const openDeleteModal = (filename: string): void => {
     setSelectedBackupFile(filename);
-    setActionType('delete');
+    setActionType("delete");
     setDeleteModalOpened(true);
   };
 
   const getSelectedConnectionName = (): string => {
-    if (!selectedDatabase) return '';
-    const connection = connections.find(c => c.id.toString() === selectedDatabase);
-    return connection ? connection.postgres_db_name : '';
+    if (!selectedDatabase) return "";
+    const connection = connections.find(
+      (c) => c.id.toString() === selectedDatabase,
+    );
+    return connection ? connection.postgres_db_name : "";
   };
 
   const getDestinationDisplayName = (destinationValue: string): string => {
-    if (destinationValue === 'local') return 'Local Storage';
-    const destination = backupDestinations.find(d => d.id.toString() === destinationValue);
+    if (destinationValue === "local") return "Local Storage";
+    const destination = backupDestinations.find(
+      (d) => d.id.toString() === destinationValue,
+    );
     return destination ? `${destination.name}` : destinationValue;
   };
 
   const formatDate = (date: Date): string => {
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -370,44 +416,55 @@ export default function BackupManagerDashboard() {
     const diffMs = now.getTime() - date.getTime();
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffHours / 24);
-    
-    if (diffDays > 0) return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
-    if (diffHours > 0) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
-    return 'Just now';
+
+    if (diffDays > 0) return `${diffDays} day${diffDays !== 1 ? "s" : ""} ago`;
+    if (diffHours > 0)
+      return `${diffHours} hour${diffHours !== 1 ? "s" : ""} ago`;
+    return "Just now";
   };
 
-  const connectionOptions = connections.map(conn => ({
+  const connectionOptions = connections.map((conn) => ({
     value: conn.id.toString(),
     label: `${conn.postgres_db_name} (${conn.postgres_host}:${conn.postgres_port})`,
   }));
 
   // Create backup destination options including local and S3 destinations
   const destinationOptions = [
-    { value: 'local', label: 'Local Storage' },
-    ...backupDestinations.map(dest => ({
+    { value: "local", label: "Local Storage" },
+    ...backupDestinations.map((dest) => ({
       value: dest.id.toString(),
-      label: `${dest.name} (S3)`
-    }))
+      label: `${dest.name} (S3)`,
+    })),
   ];
 
   const backupRows = backups.map((backup) => (
     <Table.Tr key={backup.filename}>
       <Table.Td>
         <Flex align="center" gap="sm">
-          <IconArchive size={16} stroke={1.5} color="var(--mantine-color-slate-6)" />
+          <IconArchive
+            size={16}
+            stroke={1.5}
+            color="var(--mantine-color-slate-6)"
+          />
           <Box>
-            <Text fw={500} size="sm">{backup.filename}</Text>
-            <Text size="xs" c="dimmed">{getTimeAgo(backup.timestamp)}</Text>
+            <Text fw={500} size="sm">
+              {backup.filename}
+            </Text>
+            <Text size="xs" c="dimmed">
+              {getTimeAgo(backup.timestamp)}
+            </Text>
           </Box>
         </Flex>
       </Table.Td>
       <Table.Td>
-        <Text size="sm" c="slate">{formatDate(backup.timestamp)}</Text>
+        <Text size="sm" c="slate">
+          {formatDate(backup.timestamp)}
+        </Text>
       </Table.Td>
       <Table.Td>
-        <Badge 
-          variant="light" 
-          color={backupDestination === 'local' ? 'slate' : 'slate'} 
+        <Badge
+          variant="light"
+          color={backupDestination === "local" ? "slate" : "slate"}
           size="sm"
           radius="sm"
         >
@@ -443,18 +500,20 @@ export default function BackupManagerDashboard() {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <Paper 
-          shadow="sm" 
-          p="xs" 
+        <Paper
+          shadow="sm"
+          p="xs"
           radius="sm"
-          style={{ 
-            backgroundColor: 'var(--mantine-color-neutral-0)', 
-            border: '1px solid var(--mantine-color-neutral-3)' 
+          style={{
+            backgroundColor: "var(--mantine-color-neutral-0)",
+            border: "1px solid var(--mantine-color-neutral-3)",
           }}
         >
-          <Text size="sm" fw={500}>{label}</Text>
+          <Text size="sm" fw={500}>
+            {label}
+          </Text>
           <Text size="sm" c="slate">
-            {payload[0].value} backup{payload[0].value !== 1 ? 's' : ''}
+            {payload[0].value} backup{payload[0].value !== 1 ? "s" : ""}
           </Text>
         </Paper>
       );
@@ -465,15 +524,19 @@ export default function BackupManagerDashboard() {
   return (
     <Box size="xl" py="xl">
       {/* Bottom-right notification */}
-      <BottomRightNotification 
-        notification={notification} 
-        onClose={() => setNotification(null)} 
+      <BottomRightNotification
+        notification={notification}
+        onClose={() => setNotification(null)}
       />
 
       {/* Header */}
       <Box mb="xl">
         <Flex align="center" gap="md" mb="lg">
-          <IconDatabase size={28} stroke={1.5} color="var(--mantine-color-slate-6)" />
+          <IconDatabase
+            size={28}
+            stroke={1.5}
+            color="var(--mantine-color-slate-6)"
+          />
           <Box>
             <Title size="h1" fw={500} mb={4} c="slate.8">
               Backup Manager
@@ -483,7 +546,7 @@ export default function BackupManagerDashboard() {
             </Text>
           </Box>
         </Flex>
-        
+
         <Divider my="lg" />
       </Box>
 
@@ -508,14 +571,16 @@ export default function BackupManagerDashboard() {
               placeholder="Select destination"
               data={destinationOptions}
               value={backupDestination}
-              onChange={(value) => setBackupDestination(value || 'local')}
+              onChange={(value) => setBackupDestination(value || "local")}
               leftSection={<IconServer size={16} stroke={1.5} />}
               disabled={!selectedDatabase || destinationsLoading}
               radius="sm"
             />
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 4 }}>
-            <Text size="sm" fw={500} mb="xs">Actions</Text>
+            <Text size="sm" fw={500} mb="xs">
+              Actions
+            </Text>
             <Group>
               <Button
                 leftSection={<IconCloudUpload size={16} stroke={1.5} />}
@@ -548,42 +613,72 @@ export default function BackupManagerDashboard() {
         <SimpleGrid cols={{ base: 2, sm: 4 }} mb="xl" spacing="md">
           <Card shadow="xs" p="md" radius="sm">
             <Flex align="center" gap="sm">
-              <IconDatabase size={20} stroke={1.5} color="var(--mantine-color-slate-6)" />
+              <IconDatabase
+                size={20}
+                stroke={1.5}
+                color="var(--mantine-color-slate-6)"
+              />
               <Box>
-                <Text size="xl" fw={600} c="slate.8">{stats.totalBackups}</Text>
-                <Text size="sm" c="dimmed">Total Backups</Text>
+                <Text size="xl" fw={600} c="slate.8">
+                  {stats.totalBackups}
+                </Text>
+                <Text size="sm" c="dimmed">
+                  Total Backups
+                </Text>
               </Box>
             </Flex>
           </Card>
-          
+
           <Card shadow="xs" p="md" radius="sm">
             <Flex align="center" gap="sm">
-              <IconClock size={20} stroke={1.5} color="var(--mantine-color-slate-6)" />
+              <IconClock
+                size={20}
+                stroke={1.5}
+                color="var(--mantine-color-slate-6)"
+              />
               <Box>
-                <Text size="xl" fw={600} c="slate.8">{stats.backupsToday}</Text>
-                <Text size="sm" c="dimmed">Today</Text>
+                <Text size="xl" fw={600} c="slate.8">
+                  {stats.backupsToday}
+                </Text>
+                <Text size="sm" c="dimmed">
+                  Today
+                </Text>
               </Box>
             </Flex>
           </Card>
-          
+
           <Card shadow="xs" p="md" radius="sm">
             <Flex align="center" gap="sm">
-              <IconCalendar size={20} stroke={1.5} color="var(--mantine-color-slate-6)" />
+              <IconCalendar
+                size={20}
+                stroke={1.5}
+                color="var(--mantine-color-slate-6)"
+              />
               <Box>
-                <Text size="xl" fw={600} c="slate.8">{stats.backupsThisMonth}</Text>
-                <Text size="sm" c="dimmed">This Month</Text>
+                <Text size="xl" fw={600} c="slate.8">
+                  {stats.backupsThisMonth}
+                </Text>
+                <Text size="sm" c="dimmed">
+                  This Month
+                </Text>
               </Box>
             </Flex>
           </Card>
-          
+
           <Card shadow="xs" p="md" radius="sm">
             <Flex align="center" gap="sm">
-              <IconChartLine size={20} stroke={1.5} color="var(--mantine-color-slate-6)" />
+              <IconChartLine
+                size={20}
+                stroke={1.5}
+                color="var(--mantine-color-slate-6)"
+              />
               <Box>
                 <Text size="sm" fw={500} c="slate.8">
-                  {stats.lastBackup ? getTimeAgo(stats.lastBackup) : 'Never'}
+                  {stats.lastBackup ? getTimeAgo(stats.lastBackup) : "Never"}
                 </Text>
-                <Text size="sm" c="dimmed">Last Backup</Text>
+                <Text size="sm" c="dimmed">
+                  Last Backup
+                </Text>
               </Box>
             </Flex>
           </Card>
@@ -593,27 +688,33 @@ export default function BackupManagerDashboard() {
       {/* Chart */}
       {selectedDatabase && chartData.length > 0 && (
         <Paper shadow="xs" p="lg" mb="xl" radius="sm">
-          <Title order={3} mb="md" fw={500} c="slate.8">Backup Activity (Last 30 Days)</Title>
+          <Title order={3} mb="md" fw={500} c="slate.8">
+            Backup Activity (Last 30 Days)
+          </Title>
           <Box style={{ height: 200 }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--mantine-color-neutral-3)" />
-                <XAxis 
-                  dataKey="date" 
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="var(--mantine-color-neutral-3)"
+                />
+                <XAxis
+                  dataKey="date"
                   fontSize={12}
                   stroke="var(--mantine-color-neutral-6)"
                 />
-                <YAxis 
-                  fontSize={12}
-                  stroke="var(--mantine-color-neutral-6)"
-                />
+                <YAxis fontSize={12} stroke="var(--mantine-color-neutral-6)" />
                 <Tooltip content={<CustomTooltip />} />
-                <Line 
-                  type="monotone" 
-                  dataKey="count" 
-                  stroke="var(--mantine-color-slate-6)" 
+                <Line
+                  type="monotone"
+                  dataKey="count"
+                  stroke="var(--mantine-color-slate-6)"
                   strokeWidth={2}
-                  dot={{ fill: 'var(--mantine-color-slate-6)', strokeWidth: 2, r: 3 }}
+                  dot={{
+                    fill: "var(--mantine-color-slate-6)",
+                    strokeWidth: 2,
+                    r: 3,
+                  }}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -624,38 +725,43 @@ export default function BackupManagerDashboard() {
       {/* Backups Table */}
       <Paper shadow="xs" p="lg" pos="relative" radius="sm">
         <LoadingOverlay visible={backupsLoading} />
-        
+
         <Flex justify="space-between" align="center" mb="md">
           <Title order={3} fw={500} c="slate.8">
             Backup Files
             {selectedDatabase && (
-              <Text span c="dimmed" fw={400}> - {getSelectedConnectionName()}</Text>
+              <Text span c="dimmed" fw={400}>
+                {" "}
+                - {getSelectedConnectionName()}
+              </Text>
             )}
           </Title>
-          {backupDestination !== 'local' && (
+          {backupDestination !== "local" && (
             <Badge variant="light" color="slate" radius="sm">
               {getDestinationDisplayName(backupDestination)}
             </Badge>
           )}
         </Flex>
-        
+
         {!selectedDatabase ? (
-          <Alert 
-            icon={<IconInfoCircle size={20} stroke={1.5} />} 
-            title="No database selected" 
+          <Alert
+            icon={<IconInfoCircle size={20} stroke={1.5} />}
+            title="No database selected"
             color="slate"
             radius="sm"
           >
             <Text>Please select a database connection to view backups.</Text>
           </Alert>
         ) : backups.length === 0 && !backupsLoading ? (
-          <Alert 
-            icon={<IconInfoCircle size={20} stroke={1.5} />} 
-            title="No backups found" 
+          <Alert
+            icon={<IconInfoCircle size={20} stroke={1.5} />}
+            title="No backups found"
             color="slate"
             radius="sm"
           >
-            <Text>No backup files found for the selected database and destination.</Text>
+            <Text>
+              No backup files found for the selected database and destination.
+            </Text>
           </Alert>
         ) : (
           <Table striped highlightOnHover>
@@ -686,32 +792,37 @@ export default function BackupManagerDashboard() {
         radius="sm"
       >
         <Stack gap="lg">
-          <Alert 
-            icon={<IconAlertTriangle size={20} stroke={1.5} />} 
-            title="Warning" 
+          <Alert
+            icon={<IconAlertTriangle size={20} stroke={1.5} />}
+            title="Warning"
             color="warning"
             radius="sm"
           >
             <Text>
-              This will restore the database "{getSelectedConnectionName()}" from the backup file{' '}
-              <Text span fw={500}>"{selectedBackupFile}"</Text>.
+              This will restore the database "{getSelectedConnectionName()}"
+              from the backup file{" "}
+              <Text span fw={500}>
+                "{selectedBackupFile}"
+              </Text>
+              .
             </Text>
             <Text mt="xs">
-              All current data in the database will be replaced. This action cannot be undone.
+              All current data in the database will be replaced. This action
+              cannot be undone.
             </Text>
           </Alert>
-          
+
           <Group justify="flex-end" mt="lg">
-            <Button 
-              variant="subtle" 
+            <Button
+              variant="subtle"
               onClick={() => setRestoreModalOpened(false)}
               radius="sm"
               size="sm"
             >
               Cancel
             </Button>
-            <Button 
-              color="warning" 
+            <Button
+              color="warning"
               onClick={handleRestore}
               radius="sm"
               size="sm"
@@ -736,7 +847,7 @@ export default function BackupManagerDashboard() {
       >
         <Stack gap="lg">
           <Text size="md">
-            Are you sure you want to delete the backup file{' '}
+            Are you sure you want to delete the backup file{" "}
             <Text span fw={600}>
               "{selectedBackupFile}"
             </Text>
@@ -745,19 +856,15 @@ export default function BackupManagerDashboard() {
           <Text size="sm" c="dimmed">
             This action cannot be undone.
           </Text>
-          
+
           <Group justify="flex-end" mt="lg">
-            <Button 
-              variant="subtle" 
+            <Button
+              variant="subtle"
               onClick={() => setDeleteModalOpened(false)}
             >
               Cancel
             </Button>
-            <Button 
-              color="red" 
-              onClick={handleDelete}
-              loading={deleteLoading}
-            >
+            <Button color="red" onClick={handleDelete} loading={deleteLoading}>
               Delete Backup
             </Button>
           </Group>

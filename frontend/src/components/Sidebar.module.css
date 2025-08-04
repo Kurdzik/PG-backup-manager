@@ -93,7 +93,7 @@
 }
 
 .sidebarItem::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 0;
@@ -173,7 +173,9 @@
   transform: none;
 }
 
-[data-mantine-color-scheme="dark"] .sidebarItem:hover:not([data-active]) .itemIcon {
+[data-mantine-color-scheme="dark"]
+  .sidebarItem:hover:not([data-active])
+  .itemIcon {
   background: var(--mantine-color-neutral-7);
   color: var(--mantine-color-neutral-3);
 }
@@ -228,11 +230,11 @@
   .sidebarContainer {
     width: 260px;
   }
-  
+
   .sidebarItem {
     padding: 10px 14px;
   }
-  
+
   .itemIcon {
     width: 28px !important;
     height: 28px !important;
@@ -243,15 +245,15 @@
   .sidebarContainer {
     width: 240px;
   }
-  
+
   .sidebarHeader {
     padding: 1rem;
   }
-  
+
   .scrollArea {
     padding: 0.75rem;
   }
-  
+
   .sidebarBottom > div {
     padding: 0.75rem;
   }
@@ -284,11 +286,21 @@
 }
 
 /* Minimal stagger animation */
-.sidebarItem:nth-child(1) { animation-delay: 20ms; }
-.sidebarItem:nth-child(2) { animation-delay: 40ms; }
-.sidebarItem:nth-child(3) { animation-delay: 60ms; }
-.sidebarItem:nth-child(4) { animation-delay: 80ms; }
-.sidebarItem:nth-child(5) { animation-delay: 100ms; }
+.sidebarItem:nth-child(1) {
+  animation-delay: 20ms;
+}
+.sidebarItem:nth-child(2) {
+  animation-delay: 40ms;
+}
+.sidebarItem:nth-child(3) {
+  animation-delay: 60ms;
+}
+.sidebarItem:nth-child(4) {
+  animation-delay: 80ms;
+}
+.sidebarItem:nth-child(5) {
+  animation-delay: 100ms;
+}
 
 /* Clean separator lines */
 .menuSection + .menuSection {
@@ -315,9 +327,15 @@
   background: var(--mantine-color-slate-6);
 }
 
-.statusDot.online { background: var(--mantine-color-success-6); }
-.statusDot.warning { background: var(--mantine-color-warning-6); }
-.statusDot.error { background: var(--mantine-color-error-6); }
+.statusDot.online {
+  background: var(--mantine-color-success-6);
+}
+.statusDot.warning {
+  background: var(--mantine-color-warning-6);
+}
+.statusDot.error {
+  background: var(--mantine-color-error-6);
+}
 
 /* Badge styling - minimal */
 .itemBadge {

@@ -1,67 +1,41 @@
-"use client"
-import { useState, useEffect } from "react";
+"use client";
 import {
-  Title,
+
   Text,
-  Button,
-  Table,
-  Modal,
-  Select,
-  Group,
-  Stack,
   Paper,
-  Badge,
   ActionIcon,
-  LoadingOverlay,
   Flex,
-  Alert,
   Box,
   rem,
-  Card,
-  Grid,
-  Progress,
-  Divider,
-  Container,
-  SimpleGrid,
-} from '@mantine/core';
+
+} from "@mantine/core";
 import {
-  IconDatabase,
-  IconDownload,
-  IconHistory,
-  IconTrash,
-  IconRefresh,
+
   IconCheck,
   IconX,
-  IconInfoCircle,
-  IconChartLine,
-  IconCloudUpload,
-  IconServer,
-  IconCalendar,
-  IconClock,
-  IconAlertTriangle,
-  IconArchive,
-} from '@tabler/icons-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+} from "@tabler/icons-react";
+
 
 export interface NotificationData {
-  type: 'success' | 'error';
+  type: "success" | "error";
   title: string;
   message: string;
 }
 
-const BottomRightNotification = ({ 
-  notification, 
-  onClose 
-}: { 
-  notification: NotificationData | null; 
-  onClose: () => void; 
+const BottomRightNotification = ({
+  notification,
+  onClose,
+}: {
+  notification: NotificationData | null;
+  onClose: () => void;
 }) => {
   if (!notification) return null;
 
   return (
     <Box
       style={{
-        position: 'fixed',
+        position: "fixed",
         bottom: rem(24),
         right: rem(24),
         zIndex: 1000,
@@ -74,22 +48,29 @@ const BottomRightNotification = ({
         p="md"
         radius="sm"
         style={{
-          backgroundColor: notification.type === 'success' ? 'var(--mantine-color-neutral-0)' : 'var(--mantine-color-neutral-0)',
-          border: `1px solid ${notification.type === 'success' ? 'var(--mantine-color-success-6)' : 'var(--mantine-color-error-6)'}`,
-          borderLeft: `3px solid ${notification.type === 'success' ? 'var(--mantine-color-success-6)' : 'var(--mantine-color-error-6)'}`,
+          backgroundColor:
+            notification.type === "success"
+              ? "var(--mantine-color-neutral-0)"
+              : "var(--mantine-color-neutral-0)",
+          border: `1px solid ${notification.type === "success" ? "var(--mantine-color-success-6)" : "var(--mantine-color-error-6)"}`,
+          borderLeft: `3px solid ${notification.type === "success" ? "var(--mantine-color-success-6)" : "var(--mantine-color-error-6)"}`,
         }}
       >
         <Flex align="flex-start" gap="sm">
           <Box
             style={{
-              color: notification.type === 'success' ? 'var(--mantine-color-success-6)' : 'var(--mantine-color-error-6)',
+              color:
+                notification.type === "success"
+                  ? "var(--mantine-color-success-6)"
+                  : "var(--mantine-color-error-6)",
               marginTop: rem(2),
             }}
           >
-            {notification.type === 'success' ? 
-              <IconCheck size={18} stroke={1.5} /> : 
+            {notification.type === "success" ? (
+              <IconCheck size={18} stroke={1.5} />
+            ) : (
               <IconX size={18} stroke={1.5} />
-            }
+            )}
           </Box>
           <Box style={{ flex: 1 }}>
             <Text fw={500} size="sm" mb={4}>
@@ -114,4 +95,4 @@ const BottomRightNotification = ({
   );
 };
 
-export default BottomRightNotification
+export default BottomRightNotification;

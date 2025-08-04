@@ -1,8 +1,10 @@
-"use client"
+"use client";
+import { useEffect } from 'react';
 
 export default function Home() {
-  window.location.href = '/ui/db_connections';
-  return (
-    <></>
-  );
+  useEffect(() => {
+    window.location.href = "/ui/db_connections";
+  }, []);
+
+  return <></>;
 }

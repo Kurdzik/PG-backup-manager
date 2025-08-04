@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react";
 import {
@@ -15,19 +15,19 @@ import {
   Alert,
   Flex,
   Loader,
-  Center
-} from '@mantine/core';
+  Center,
+} from "@mantine/core";
 import {
   IconUser,
   IconLock,
   IconLogin,
   IconInfoCircle,
   IconDatabase,
-  IconUserPlus
-} from '@tabler/icons-react';
+  IconUserPlus,
+} from "@tabler/icons-react";
 
-import { post, get } from "@/lib/backendRequests"
-import { setAuthCookie } from "@/lib/cookies"
+import { post, get } from "@/lib/backendRequests";
+import { setAuthCookie } from "@/lib/cookies";
 
 interface FormData {
   username: string;
@@ -74,8 +74,12 @@ export default function AuthPage() {
     try {
       setCheckingUsers(true);
       const response: UserListResponse = await get("user/list", false);
-      
-      if (response.status === 'OK' && response.data && response.data.length > 0) {
+
+      if (
+        response.status === "OK" &&
+        response.data &&
+        response.data.length > 0
+      ) {
         setHasUsers(true);
         setIsRegistration(false);
       } else {
@@ -94,9 +98,9 @@ export default function AuthPage() {
 
   const handleFormDataChange = <K extends keyof FormData>(
     field: K,
-    value: FormData[K]
+    value: FormData[K],
   ): void => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const isFormValid = (): boolean => {
@@ -105,25 +109,29 @@ export default function AuthPage() {
 
   const handleLogin = async (): Promise<void> => {
     if (!isFormValid()) return;
-    
+
     try {
       setLoading(true);
       setError(null);
-      
-      const response: LoginResponse = await post("user/login", {
-        username: formData.username,
-        password: formData.password
-      }, false);
-      
+
+      const response: LoginResponse = await post(
+        "user/login",
+        {
+          username: formData.username,
+          password: formData.password,
+        },
+        false,
+      );
+
       if (response.payload && response.status.includes("logged in")) {
         console.log("JWT Token:", response.payload);
         setAuthCookie(response.payload);
-        window.location.href = '/ui/db_connections';
+        window.location.href = "/ui/db_connections";
       } else {
-        setError(response.status || 'Login failed');
+        setError(response.status || "Login failed");
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred during login');
+      setError(err.message || "An error occurred during login");
       console.error("Login error:", err);
     } finally {
       setLoading(false);
@@ -132,24 +140,28 @@ export default function AuthPage() {
 
   const handleRegistration = async (): Promise<void> => {
     if (!isFormValid()) return;
-    
+
     try {
       setLoading(true);
       setError(null);
-      
-      const response: CreateUserResponse = await post("user/create", {
-        username: formData.username,
-        password: formData.password
-      }, false);
-      
-      if (response.status === 'User created succesfully') {
+
+      const response: CreateUserResponse = await post(
+        "user/create",
+        {
+          username: formData.username,
+          password: formData.password,
+        },
+        false,
+      );
+
+      if (response.status === "User created succesfully") {
         // After successful registration, automatically log in
         await handleLogin();
       } else {
-        setError(response.status || 'Registration failed');
+        setError(response.status || "Registration failed");
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred during registration');
+      setError(err.message || "An error occurred during registration");
       console.error("Registration error:", err);
     } finally {
       setLoading(false);
@@ -165,7 +177,7 @@ export default function AuthPage() {
   };
 
   const handleKeyPress = (event: React.KeyboardEvent): void => {
-    if (event.key === 'Enter' && isFormValid()) {
+    if (event.key === "Enter" && isFormValid()) {
       handleSubmit();
     }
   };
@@ -175,14 +187,17 @@ export default function AuthPage() {
     return (
       <Box
         style={{
-          minHeight: '100vh',
-          background: 'linear-gradient(135deg, var(--mantine-color-slate-0) 0%, var(--mantine-color-slate-3) 50%, var(--mantine-color-slate-5) 100%)',
+          minHeight: "100vh",
+          background:
+            "linear-gradient(135deg, var(--mantine-color-slate-0) 0%, var(--mantine-color-slate-3) 50%, var(--mantine-color-slate-5) 100%)",
         }}
       >
-        <Center style={{ minHeight: '100vh' }}>
+        <Center style={{ minHeight: "100vh" }}>
           <Stack align="center" gap="md">
             <Loader size="lg" color="slate" />
-            <Text c="slate.6" size="sm">Checking system status...</Text>
+            <Text c="slate.6" size="sm">
+              Checking system status...
+            </Text>
           </Stack>
         </Center>
       </Box>
@@ -192,51 +207,52 @@ export default function AuthPage() {
   return (
     <Box
       style={{
-        minHeight: '100vh',
-        position: 'relative',
-        overflow: 'hidden',
-        background: 'linear-gradient(135deg, var(--mantine-color-slate-0) 0%, var(--mantine-color-slate-3) 50%, var(--mantine-color-slate-5) 100%)',
+        minHeight: "100vh",
+        position: "relative",
+        overflow: "hidden",
+        background:
+          "linear-gradient(135deg, var(--mantine-color-slate-0) 0%, var(--mantine-color-slate-3) 50%, var(--mantine-color-slate-5) 100%)",
       }}
     >
       {/* Blurred Background Elements */}
       <Box
         style={{
-          position: 'absolute',
-          top: '-15%',
-          left: '-8%',
-          width: '35%',
-          height: '50%',
-          borderRadius: '50%',
-          background: 'var(--mantine-color-slate-4)',
-          filter: 'blur(120px)',
+          position: "absolute",
+          top: "-15%",
+          left: "-8%",
+          width: "35%",
+          height: "50%",
+          borderRadius: "50%",
+          background: "var(--mantine-color-slate-4)",
+          filter: "blur(120px)",
           opacity: 0.15,
           zIndex: 0,
         }}
       />
       <Box
         style={{
-          position: 'absolute',
-          bottom: '-25%',
-          right: '-12%',
-          width: '45%',
-          height: '60%',
-          borderRadius: '50%',
-          background: 'var(--mantine-color-slate-3)',
-          filter: 'blur(140px)',
+          position: "absolute",
+          bottom: "-25%",
+          right: "-12%",
+          width: "45%",
+          height: "60%",
+          borderRadius: "50%",
+          background: "var(--mantine-color-slate-3)",
+          filter: "blur(140px)",
           opacity: 0.12,
           zIndex: 0,
         }}
       />
       <Box
         style={{
-          position: 'absolute',
-          top: '25%',
-          right: '15%',
-          width: '25%',
-          height: '35%',
-          borderRadius: '50%',
-          background: 'var(--mantine-color-slate-5)',
-          filter: 'blur(100px)',
+          position: "absolute",
+          top: "25%",
+          right: "15%",
+          width: "25%",
+          height: "35%",
+          borderRadius: "50%",
+          background: "var(--mantine-color-slate-5)",
+          filter: "blur(100px)",
           opacity: 0.1,
           zIndex: 0,
         }}
@@ -246,12 +262,12 @@ export default function AuthPage() {
       <Container
         size="xs"
         style={{
-          position: 'relative',
+          position: "relative",
           zIndex: 1,
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         <Paper
@@ -260,12 +276,12 @@ export default function AuthPage() {
           radius="sm"
           withBorder
           style={{
-            width: '100%',
+            width: "100%",
             maxWidth: rem(400),
-            backgroundColor: 'var(--mantine-color-neutral-0)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid var(--mantine-color-neutral-2)',
-            transition: 'all 150ms ease',
+            backgroundColor: "var(--mantine-color-neutral-0)",
+            backdropFilter: "blur(12px)",
+            border: "1px solid var(--mantine-color-neutral-2)",
+            transition: "all 150ms ease",
           }}
         >
           <Stack gap="lg">
@@ -276,50 +292,52 @@ export default function AuthPage() {
                   style={{
                     padding: rem(14),
                     borderRadius: rem(8),
-                    backgroundColor: 'var(--mantine-color-slate-1)',
-                    border: '1px solid var(--mantine-color-slate-2)',
-                    transition: 'all 150ms ease',
+                    backgroundColor: "var(--mantine-color-slate-1)",
+                    border: "1px solid var(--mantine-color-slate-2)",
+                    transition: "all 150ms ease",
                   }}
                 >
-                  <IconDatabase size={28} color="var(--mantine-color-slate-6)" />
+                  <IconDatabase
+                    size={28}
+                    color="var(--mantine-color-slate-6)"
+                  />
                 </Box>
               </Flex>
-              <Title 
-                order={2} 
-                size="1.5rem" 
-                fw={600} 
-                mb="xs" 
+              <Title
+                order={2}
+                size="1.5rem"
+                fw={600}
+                mb="xs"
                 c="slate.8"
                 style={{
-                  fontFamily: 'var(--mantine-font-family)',
+                  fontFamily: "var(--mantine-font-family)",
                 }}
               >
-                {isRegistration ? 'Get Started' : 'Welcome Back'}
+                {isRegistration ? "Get Started" : "Welcome Back"}
               </Title>
-              <Text 
-                size="sm" 
+              <Text
+                size="sm"
                 c="slate.5"
                 style={{
-                  fontFamily: 'var(--mantine-font-family)',
+                  fontFamily: "var(--mantine-font-family)",
                 }}
               >
-                {isRegistration 
-                  ? 'Create your admin account to get started' 
-                  : 'Sign in to manage your database connections'
-                }
+                {isRegistration
+                  ? "Create your admin account to get started"
+                  : "Sign in to manage your database connections"}
               </Text>
             </Box>
 
             {/* Error Alert */}
             {error && (
-              <Alert 
-                icon={<IconInfoCircle size={18} />} 
-                color="error" 
+              <Alert
+                icon={<IconInfoCircle size={18} />}
+                color="error"
                 radius="sm"
                 style={{
-                  backgroundColor: 'var(--mantine-color-error-0)',
-                  border: '1px solid var(--mantine-color-error-2)',
-                  color: 'var(--mantine-color-error-7)',
+                  backgroundColor: "var(--mantine-color-error-0)",
+                  border: "1px solid var(--mantine-color-error-2)",
+                  color: "var(--mantine-color-error-7)",
                 }}
               >
                 {error}
@@ -333,27 +351,29 @@ export default function AuthPage() {
                 placeholder="Enter your username"
                 required
                 size="sm"
-                leftSection={<IconUser size={16} color="var(--mantine-color-slate-5)" />}
+                leftSection={
+                  <IconUser size={16} color="var(--mantine-color-slate-5)" />
+                }
                 value={formData.username}
                 onChange={(event) =>
-                  handleFormDataChange('username', event.currentTarget.value)
+                  handleFormDataChange("username", event.currentTarget.value)
                 }
                 onKeyPress={handleKeyPress}
                 styles={{
                   label: {
-                    color: 'var(--mantine-color-slate-7)',
+                    color: "var(--mantine-color-slate-7)",
                     fontSize: rem(14),
                     fontWeight: 500,
                     marginBottom: rem(6),
                   },
                   input: {
                     fontSize: rem(14),
-                    backgroundColor: 'var(--mantine-color-neutral-0)',
-                    border: '1px solid var(--mantine-color-neutral-4)',
+                    backgroundColor: "var(--mantine-color-neutral-0)",
+                    border: "1px solid var(--mantine-color-neutral-4)",
                     borderRadius: rem(6),
-                    '&:focus': {
-                      borderColor: 'var(--mantine-color-slate-6)',
-                      boxShadow: '0 0 0 2px var(--mantine-color-slate-1)',
+                    "&:focus": {
+                      borderColor: "var(--mantine-color-slate-6)",
+                      boxShadow: "0 0 0 2px var(--mantine-color-slate-1)",
                     },
                   },
                 }}
@@ -364,27 +384,29 @@ export default function AuthPage() {
                 placeholder="Enter your password"
                 required
                 size="sm"
-                leftSection={<IconLock size={16} color="var(--mantine-color-slate-5)" />}
+                leftSection={
+                  <IconLock size={16} color="var(--mantine-color-slate-5)" />
+                }
                 value={formData.password}
                 onChange={(event) =>
-                  handleFormDataChange('password', event.currentTarget.value)
+                  handleFormDataChange("password", event.currentTarget.value)
                 }
                 onKeyPress={handleKeyPress}
                 styles={{
                   label: {
-                    color: 'var(--mantine-color-slate-7)',
+                    color: "var(--mantine-color-slate-7)",
                     fontSize: rem(14),
                     fontWeight: 500,
                     marginBottom: rem(6),
                   },
                   input: {
                     fontSize: rem(14),
-                    backgroundColor: 'var(--mantine-color-neutral-0)',
-                    border: '1px solid var(--mantine-color-neutral-4)',
+                    backgroundColor: "var(--mantine-color-neutral-0)",
+                    border: "1px solid var(--mantine-color-neutral-4)",
                     borderRadius: rem(6),
-                    '&:focus': {
-                      borderColor: 'var(--mantine-color-slate-6)',
-                      boxShadow: '0 0 0 2px var(--mantine-color-slate-1)',
+                    "&:focus": {
+                      borderColor: "var(--mantine-color-slate-6)",
+                      boxShadow: "0 0 0 2px var(--mantine-color-slate-1)",
                     },
                   },
                 }}
@@ -393,7 +415,13 @@ export default function AuthPage() {
               <Button
                 fullWidth
                 size="sm"
-                leftSection={isRegistration ? <IconUserPlus size={16} /> : <IconLogin size={16} />}
+                leftSection={
+                  isRegistration ? (
+                    <IconUserPlus size={16} />
+                  ) : (
+                    <IconLogin size={16} />
+                  )
+                }
                 onClick={handleSubmit}
                 loading={loading}
                 disabled={!isFormValid()}
@@ -405,31 +433,31 @@ export default function AuthPage() {
                     fontSize: rem(14),
                     fontWeight: 500,
                     borderRadius: rem(6),
-                    backgroundColor: 'var(--mantine-color-slate-6)',
-                    transition: 'all 150ms ease',
-                    '&:hover:not([data-disabled])': {
-                      backgroundColor: 'var(--mantine-color-slate-7)',
-                      transform: 'translateY(-1px)',
-                      boxShadow: 'var(--mantine-shadow-sm)',
+                    backgroundColor: "var(--mantine-color-slate-6)",
+                    transition: "all 150ms ease",
+                    "&:hover:not([data-disabled])": {
+                      backgroundColor: "var(--mantine-color-slate-7)",
+                      transform: "translateY(-1px)",
+                      boxShadow: "var(--mantine-shadow-sm)",
                     },
-                    '&[data-disabled]': {
-                      backgroundColor: 'var(--mantine-color-slate-3)',
-                      color: 'var(--mantine-color-slate-5)',
+                    "&[data-disabled]": {
+                      backgroundColor: "var(--mantine-color-slate-3)",
+                      color: "var(--mantine-color-slate-5)",
                     },
                   },
                 }}
               >
-                {isRegistration ? 'Create Account' : 'Sign In'}
+                {isRegistration ? "Create Account" : "Sign In"}
               </Button>
             </Stack>
 
             {/* Footer */}
             <Box ta="center" mt="md">
-              <Text 
-                size="xs" 
+              <Text
+                size="xs"
                 c="slate.4"
                 style={{
-                  fontFamily: 'var(--mantine-font-family)',
+                  fontFamily: "var(--mantine-font-family)",
                 }}
               >
                 Database Connection Manager v1.0

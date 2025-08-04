@@ -240,7 +240,7 @@ export const theme = createTheme({
       card: "0 2px 4px rgba(0,0,0,0.06)",
       elevated: "0 4px 8px rgba(0,0,0,0.08)",
       floating: "0 8px 16px rgba(0,0,0,0.10)",
-    }, 
+    },
   },
 });
 
@@ -248,7 +248,7 @@ export const theme = createTheme({
 export const colors = [
   "#64748b", // slate
   "#22c55e", // green
-  "#f59e0b", // amber  
+  "#f59e0b", // amber
   "#dc2626", // red
   "#0ea5e9", // blue
   "#8b5cf6", // purple

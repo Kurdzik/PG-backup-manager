@@ -1,4 +1,3 @@
-
 export interface BackupDestination {
   id: number;
   connection_id: number;

@@ -1,4 +1,3 @@
--- Connection table
 CREATE TABLE connections (
     id SERIAL PRIMARY KEY,
     postgres_host VARCHAR(255) NOT NULL,
@@ -11,10 +10,8 @@ CREATE TABLE connections (
     UNIQUE(postgres_host, postgres_port, postgres_db_name)
 );
 
--- Create an index on commonly queried fields
 CREATE INDEX idx_connections_host_port ON connections(postgres_host, postgres_port);
 
--- Update trigger for updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -27,7 +24,6 @@ CREATE TRIGGER update_connections_updated_at
     BEFORE UPDATE ON connections 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Destination table
 CREATE TABLE destinations (
     id SERIAL PRIMARY KEY,
     connection_id INTEGER NOT NULL,
@@ -50,29 +46,26 @@ CREATE TABLE destinations (
         ON UPDATE CASCADE
 );
 
--- Create indexes on commonly queried fields
 CREATE INDEX idx_destinations_name ON destinations(name);
 CREATE INDEX idx_destinations_endpoint ON destinations(endpoint_url);
 CREATE INDEX idx_destinations_bucket ON destinations(bucket_name);
 CREATE INDEX idx_destinations_connection_id ON destinations(connection_id);
 
--- Update trigger for updated_at
 CREATE TRIGGER update_destinations_updated_at 
     BEFORE UPDATE ON destinations 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Backup schedules table
 CREATE TABLE backup_schedules (
     id SERIAL PRIMARY KEY,
     connection_id INTEGER NOT NULL,
     destination_id INTEGER NOT NULL,
-    schedule VARCHAR(255) NOT NULL, -- Cron expression or schedule string
+    schedule VARCHAR(255) NOT NULL,
     enabled BOOLEAN DEFAULT TRUE,
     last_run TIMESTAMP,
     next_run TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(connection_id, destination_id), -- One schedule per connection-destination pair
+    UNIQUE(connection_id, destination_id),
     CONSTRAINT fk_backup_schedules_connection 
         FOREIGN KEY (connection_id) 
         REFERENCES connections(id) 
@@ -85,20 +78,17 @@ CREATE TABLE backup_schedules (
         ON UPDATE CASCADE
 );
 
--- Create indexes on commonly queried fields
 CREATE INDEX idx_backup_schedules_connection_id ON backup_schedules(connection_id);
 CREATE INDEX idx_backup_schedules_destination_id ON backup_schedules(destination_id);
 CREATE INDEX idx_backup_schedules_enabled ON backup_schedules(enabled);
 CREATE INDEX idx_backup_schedules_next_run ON backup_schedules(next_run);
 
--- Update trigger for updated_at
 CREATE TRIGGER update_backup_schedules_updated_at 
     BEFORE UPDATE ON backup_schedules 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 
 
--- Users table
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(255) NOT NULL UNIQUE,
@@ -107,10 +97,8 @@ CREATE TABLE users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create index on username for faster lookups
 CREATE INDEX idx_users_username ON users(username);
 
--- Update trigger for updated_at
 CREATE TRIGGER update_users_updated_at 
     BEFORE UPDATE ON users 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
