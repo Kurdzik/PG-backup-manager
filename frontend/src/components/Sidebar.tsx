@@ -14,7 +14,7 @@ import {
 } from "@mantine/core";
 import {
   IconDatabase,
-  IconServer2,
+  IconFileDatabase,
   IconCloud,
   IconLogout,
   IconShield,
@@ -62,7 +62,7 @@ const mainItems: MainItemType[] = [
     route: "/ui/schedules",
   },
   {
-    icon: <IconServer2 size={16} stroke={1.5} />,
+    icon: <IconFileDatabase size={16} stroke={1.5} />,
     label: "Manage Backups",
     route: "/ui/backups",
   },

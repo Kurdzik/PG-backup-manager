@@ -24,14 +24,13 @@ import {
   Drawer,
 } from "@mantine/core";
 import {
-  IconDatabase,
+  IconAffiliate,
   IconPlus,
   IconEdit,
   IconTrash,
+  IconDatabase,
   IconRefresh,
-
   IconInfoCircle,
-  IconServer,
   IconPlugConnected,
 } from "@tabler/icons-react";
 
@@ -282,7 +281,7 @@ export default function DatabaseConnectionsDashboard() {
     <Table.Tr key={connection.id}>
       <Table.Td>
         <Flex align="center" gap="sm">
-          <IconServer size={18} color="#495057" />
+          <IconDatabase size={18} color="#495057" />
           <Box>
             <Text fw={500} size="md">
               {connection.postgres_db_name}
@@ -343,7 +342,7 @@ export default function DatabaseConnectionsDashboard() {
       {/* Header */}
       <Box mb="xl">
         <Flex align="center" gap="md" mb="lg">
-          <IconDatabase size={32} />
+          <IconAffiliate size={32} />
           <Box>
             <Title order={1} size="2rem" fw={600} mb="xs">
               Database Connections
@@ -535,7 +534,7 @@ export default function DatabaseConnectionsDashboard() {
             >
               Cancel
             </Button>
-            <Button color="red" onClick={confirmDelete}>
+            <Button color="error" onClick={confirmDelete}>
               Delete Connection
             </Button>
           </Group>

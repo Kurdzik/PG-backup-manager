@@ -121,10 +121,11 @@ export default function S3BackupDestinations() {
     try {
       setTestLoading(true);
 
-      // Convert connection_id to number for API
+      // Convert connection_id to number for API and ensure path_prefix is properly handled
       const payload = {
         ...formData,
         connection_id: parseInt(formData.connection_id, 10),
+        path_prefix: formData.path_prefix.trim(), // Trim whitespace but keep empty string
       };
 
       const response: ApiResponse = await post(
@@ -172,10 +173,11 @@ export default function S3BackupDestinations() {
       setFormLoading(true);
       let response: ApiResponse;
 
-      // Convert connection_id to number for API
+      // Convert connection_id to number for API and ensure path_prefix is properly handled
       const payload = {
         ...formData,
         connection_id: parseInt(formData.connection_id, 10),
+        path_prefix: formData.path_prefix.trim(), // Trim whitespace but keep empty string
       };
 
       if (editingDestination) {
@@ -255,7 +257,7 @@ export default function S3BackupDestinations() {
       bucket_name: destination.bucket_name,
       access_key_id: destination.access_key_id,
       secret_access_key: destination.secret_access_key, // Show current value for editing
-      path_prefix: destination.path_prefix,
+      path_prefix: destination.path_prefix || "", // Ensure empty string if null/undefined
       use_ssl: destination.use_ssl,
       verify_ssl: destination.verify_ssl,
     });
@@ -271,7 +273,7 @@ export default function S3BackupDestinations() {
       bucket_name: "",
       access_key_id: "",
       secret_access_key: "",
-      path_prefix: "",
+      path_prefix: "", // Explicitly set to empty string
       use_ssl: true,
       verify_ssl: true,
     });
@@ -567,6 +569,7 @@ export default function S3BackupDestinations() {
           <TextInput
             label="Path Prefix"
             placeholder="postgres/ (optional)"
+            description="Leave blank for root path"
             value={formData.path_prefix}
             onChange={(event) =>
               handleFormDataChange("path_prefix", event.currentTarget.value)
@@ -643,7 +646,7 @@ export default function S3BackupDestinations() {
             >
               Cancel
             </Button>
-            <Button color="red" onClick={confirmDelete}>
+            <Button color="error" onClick={confirmDelete}>
               Delete Destination
             </Button>
           </Group>

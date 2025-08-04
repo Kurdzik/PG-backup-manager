@@ -759,7 +759,7 @@ export default function BackupScheduleDashboard() {
             >
               Cancel
             </Button>
-            <Button color="red" onClick={confirmDelete}>
+            <Button color="error" onClick={confirmDelete}>
               Delete Schedule
             </Button>
           </Group>

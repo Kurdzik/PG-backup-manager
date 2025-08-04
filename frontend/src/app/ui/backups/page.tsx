@@ -17,25 +17,20 @@ import {
   Flex,
   Alert,
   Box,
-
   Card,
   Grid,
-
-  Divider,
-
   SimpleGrid,
 } from "@mantine/core";
 import {
   IconDatabase,
-
   IconHistory,
+  IconFileDatabase,
   IconTrash,
   IconRefresh,
-
   IconInfoCircle,
   IconChartLine,
   IconCloudUpload,
-  IconServer,
+  IconCloud,
   IconCalendar,
   IconClock,
   IconAlertTriangle,
@@ -109,6 +104,7 @@ export default function BackupManagerDashboard() {
     null,
   );
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+  const [restoreLoading, setRestoreLoading] = useState<boolean>(false);
 
   useEffect(() => {
     loadConnections();
@@ -328,6 +324,7 @@ export default function BackupManagerDashboard() {
     if (!selectedDatabase || !selectedBackupFile) return;
 
     try {
+      setRestoreLoading(true);
       const response: ApiResponse = await post("backup/restore", {
         database_id: selectedDatabase,
         backup_destination: backupDestination,
@@ -345,6 +342,7 @@ export default function BackupManagerDashboard() {
       showNotification("error", "Error", "Failed to restore database");
       console.error("Error restoring database:", err);
     } finally {
+      setRestoreLoading(false);
       setRestoreModalOpened(false);
       setSelectedBackupFile(null);
     }
@@ -441,13 +439,9 @@ export default function BackupManagerDashboard() {
     <Table.Tr key={backup.filename}>
       <Table.Td>
         <Flex align="center" gap="sm">
-          <IconArchive
-            size={16}
-            stroke={1.5}
-            color="var(--mantine-color-slate-6)"
-          />
+          <IconArchive size={18} color="#495057" />
           <Box>
-            <Text fw={500} size="sm">
+            <Text fw={500} size="md">
               {backup.filename}
             </Text>
             <Text size="xs" c="dimmed">
@@ -457,17 +451,12 @@ export default function BackupManagerDashboard() {
         </Flex>
       </Table.Td>
       <Table.Td>
-        <Text size="sm" c="slate">
+        <Text size="sm" c="dimmed">
           {formatDate(backup.timestamp)}
         </Text>
       </Table.Td>
       <Table.Td>
-        <Badge
-          variant="light"
-          color={backupDestination === "local" ? "slate" : "slate"}
-          size="sm"
-          radius="sm"
-        >
+        <Badge variant="outline" radius={"sm"} size="sm">
           {getDestinationDisplayName(backupDestination)}
         </Badge>
       </Table.Td>
@@ -477,20 +466,16 @@ export default function BackupManagerDashboard() {
             variant="outline"
             onClick={() => openRestoreModal(backup.filename)}
             aria-label={`Restore backup ${backup.filename}`}
-            radius="sm"
-            size="sm"
           >
-            <IconHistory size={16} stroke={1.5} />
+            <IconHistory size={16} />
           </ActionIcon>
           <ActionIcon
             variant="outline"
             color="error"
             onClick={() => openDeleteModal(backup.filename)}
             aria-label={`Delete backup ${backup.filename}`}
-            radius="sm"
-            size="sm"
           >
-            <IconTrash size={16} stroke={1.5} />
+            <IconTrash size={16} />
           </ActionIcon>
         </Group>
       </Table.Td>
@@ -500,19 +485,11 @@ export default function BackupManagerDashboard() {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <Paper
-          shadow="sm"
-          p="xs"
-          radius="sm"
-          style={{
-            backgroundColor: "var(--mantine-color-neutral-0)",
-            border: "1px solid var(--mantine-color-neutral-3)",
-          }}
-        >
+        <Paper shadow="sm" p="xs" radius="sm">
           <Text size="sm" fw={500}>
             {label}
           </Text>
-          <Text size="sm" c="slate">
+          <Text size="sm" c="dimmed">
             {payload[0].value} backup{payload[0].value !== 1 ? "s" : ""}
           </Text>
         </Paper>
@@ -522,7 +499,7 @@ export default function BackupManagerDashboard() {
   };
 
   return (
-    <Box size="xl" py="xl">
+    <Box style={{ width: "90%", margin: "0 auto", padding: "2rem 0" }}>
       {/* Bottom-right notification */}
       <BottomRightNotification
         notification={notification}
@@ -532,26 +509,20 @@ export default function BackupManagerDashboard() {
       {/* Header */}
       <Box mb="xl">
         <Flex align="center" gap="md" mb="lg">
-          <IconDatabase
-            size={28}
-            stroke={1.5}
-            color="var(--mantine-color-slate-6)"
-          />
+          <IconFileDatabase size={32} />
           <Box>
-            <Title size="h1" fw={500} mb={4} c="slate.8">
+            <Title order={1} size="2rem" fw={600} mb="xs">
               Backup Manager
             </Title>
-            <Text size="md" c="dimmed" fw={400}>
+            <Text size="lg" c="dimmed">
               Create, manage, and restore PostgreSQL database backups
             </Text>
           </Box>
         </Flex>
-
-        <Divider my="lg" />
       </Box>
 
       {/* Controls */}
-      <Paper shadow="xs" p="lg" mb="xl" radius="sm">
+      <Paper shadow="sm" p="lg" mb="xl" style={{ width: "100%" }}>
         <Grid>
           <Grid.Col span={{ base: 12, md: 4 }}>
             <Select
@@ -560,9 +531,8 @@ export default function BackupManagerDashboard() {
               data={connectionOptions}
               value={selectedDatabase}
               onChange={setSelectedDatabase}
-              leftSection={<IconDatabase size={16} stroke={1.5} />}
+              leftSection={<IconDatabase size={16} />}
               disabled={loading}
-              radius="sm"
             />
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 4 }}>
@@ -572,9 +542,8 @@ export default function BackupManagerDashboard() {
               data={destinationOptions}
               value={backupDestination}
               onChange={(value) => setBackupDestination(value || "local")}
-              leftSection={<IconServer size={16} stroke={1.5} />}
+              leftSection={<IconCloud size={16} />}
               disabled={!selectedDatabase || destinationsLoading}
-              radius="sm"
             />
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 4 }}>
@@ -583,23 +552,19 @@ export default function BackupManagerDashboard() {
             </Text>
             <Group>
               <Button
-                leftSection={<IconCloudUpload size={16} stroke={1.5} />}
+                leftSection={<IconCloudUpload size={16} />}
                 onClick={createBackup}
                 loading={createBackupLoading}
                 disabled={!selectedDatabase || !backupDestination}
-                radius="sm"
-                size="sm"
               >
                 Create Backup
               </Button>
               <Button
-                leftSection={<IconRefresh size={16} stroke={1.5} />}
+                leftSection={<IconRefresh size={16} />}
                 variant="light"
                 onClick={loadBackups}
                 loading={backupsLoading}
                 disabled={!selectedDatabase || !backupDestination}
-                radius="sm"
-                size="sm"
               >
                 Refresh
               </Button>
@@ -608,18 +573,25 @@ export default function BackupManagerDashboard() {
         </Grid>
       </Paper>
 
+      {/* Action Bar */}
+      <Box mb="xl">
+        <Flex justify="space-between" align="center" style={{ width: "100%" }}>
+          <Group>
+            <Badge variant="outline" radius={"sm"} size="md">
+              {backups.length} backup{backups.length !== 1 ? "s" : ""}
+            </Badge>
+          </Group>
+        </Flex>
+      </Box>
+
       {/* Stats Cards */}
       {selectedDatabase && (
         <SimpleGrid cols={{ base: 2, sm: 4 }} mb="xl" spacing="md">
-          <Card shadow="xs" p="md" radius="sm">
+          <Card shadow="sm" p="md">
             <Flex align="center" gap="sm">
-              <IconDatabase
-                size={20}
-                stroke={1.5}
-                color="var(--mantine-color-slate-6)"
-              />
+              <IconFileDatabase size={20} color="#495057" />
               <Box>
-                <Text size="xl" fw={600} c="slate.8">
+                <Text size="xl" fw={600}>
                   {stats.totalBackups}
                 </Text>
                 <Text size="sm" c="dimmed">
@@ -629,15 +601,11 @@ export default function BackupManagerDashboard() {
             </Flex>
           </Card>
 
-          <Card shadow="xs" p="md" radius="sm">
+          <Card shadow="sm" p="md">
             <Flex align="center" gap="sm">
-              <IconClock
-                size={20}
-                stroke={1.5}
-                color="var(--mantine-color-slate-6)"
-              />
+              <IconClock size={20} color="#495057" />
               <Box>
-                <Text size="xl" fw={600} c="slate.8">
+                <Text size="xl" fw={600}>
                   {stats.backupsToday}
                 </Text>
                 <Text size="sm" c="dimmed">
@@ -647,15 +615,11 @@ export default function BackupManagerDashboard() {
             </Flex>
           </Card>
 
-          <Card shadow="xs" p="md" radius="sm">
+          <Card shadow="sm" p="md">
             <Flex align="center" gap="sm">
-              <IconCalendar
-                size={20}
-                stroke={1.5}
-                color="var(--mantine-color-slate-6)"
-              />
+              <IconCalendar size={20} color="#495057" />
               <Box>
-                <Text size="xl" fw={600} c="slate.8">
+                <Text size="xl" fw={600}>
                   {stats.backupsThisMonth}
                 </Text>
                 <Text size="sm" c="dimmed">
@@ -665,15 +629,11 @@ export default function BackupManagerDashboard() {
             </Flex>
           </Card>
 
-          <Card shadow="xs" p="md" radius="sm">
+          <Card shadow="sm" p="md">
             <Flex align="center" gap="sm">
-              <IconChartLine
-                size={20}
-                stroke={1.5}
-                color="var(--mantine-color-slate-6)"
-              />
+              <IconChartLine size={20} color="#495057" />
               <Box>
-                <Text size="sm" fw={500} c="slate.8">
+                <Text size="sm" fw={500}>
                   {stats.lastBackup ? getTimeAgo(stats.lastBackup) : "Never"}
                 </Text>
                 <Text size="sm" c="dimmed">
@@ -687,34 +647,23 @@ export default function BackupManagerDashboard() {
 
       {/* Chart */}
       {selectedDatabase && chartData.length > 0 && (
-        <Paper shadow="xs" p="lg" mb="xl" radius="sm">
-          <Title order={3} mb="md" fw={500} c="slate.8">
+        <Paper shadow="sm" p="lg" mb="xl" style={{ width: "100%" }}>
+          <Title order={3} mb="md" fw={500}>
             Backup Activity (Last 30 Days)
           </Title>
           <Box style={{ height: 200 }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="var(--mantine-color-neutral-3)"
-                />
-                <XAxis
-                  dataKey="date"
-                  fontSize={12}
-                  stroke="var(--mantine-color-neutral-6)"
-                />
-                <YAxis fontSize={12} stroke="var(--mantine-color-neutral-6)" />
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" fontSize={12} />
+                <YAxis fontSize={12} />
                 <Tooltip content={<CustomTooltip />} />
                 <Line
                   type="monotone"
                   dataKey="count"
-                  stroke="var(--mantine-color-slate-6)"
+                  stroke="#495057"
                   strokeWidth={2}
-                  dot={{
-                    fill: "var(--mantine-color-slate-6)",
-                    strokeWidth: 2,
-                    r: 3,
-                  }}
+                  dot={{ fill: "#495057", strokeWidth: 2, r: 3 }}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -723,11 +672,11 @@ export default function BackupManagerDashboard() {
       )}
 
       {/* Backups Table */}
-      <Paper shadow="xs" p="lg" pos="relative" radius="sm">
+      <Paper shadow="sm" p="lg" pos="relative" style={{ width: "100%" }}>
         <LoadingOverlay visible={backupsLoading} />
 
         <Flex justify="space-between" align="center" mb="md">
-          <Title order={3} fw={500} c="slate.8">
+          <Title order={3} fw={500}>
             Backup Files
             {selectedDatabase && (
               <Text span c="dimmed" fw={400}>
@@ -736,28 +685,21 @@ export default function BackupManagerDashboard() {
               </Text>
             )}
           </Title>
-          {backupDestination !== "local" && (
-            <Badge variant="light" color="slate" radius="sm">
-              {getDestinationDisplayName(backupDestination)}
-            </Badge>
-          )}
         </Flex>
 
         {!selectedDatabase ? (
           <Alert
-            icon={<IconInfoCircle size={20} stroke={1.5} />}
+            icon={<IconInfoCircle size={20} />}
             title="No database selected"
-            color="slate"
-            radius="sm"
+            color="blue"
           >
             <Text>Please select a database connection to view backups.</Text>
           </Alert>
         ) : backups.length === 0 && !backupsLoading ? (
           <Alert
-            icon={<IconInfoCircle size={20} stroke={1.5} />}
+            icon={<IconInfoCircle size={20} />}
             title="No backups found"
-            color="slate"
-            radius="sm"
+            color="blue"
           >
             <Text>
               No backup files found for the selected database and destination.
@@ -781,22 +723,23 @@ export default function BackupManagerDashboard() {
       {/* Restore Confirmation Modal */}
       <Modal
         opened={restoreModalOpened}
-        onClose={() => setRestoreModalOpened(false)}
+        onClose={() => !restoreLoading && setRestoreModalOpened(false)}
         title={
-          <Text fw={500} size="lg" c="slate.8">
+          <Text fw={600} size="lg">
             Restore Database
           </Text>
         }
-        size="xl"
+        size="md"
         centered
-        radius="sm"
+        closeOnClickOutside={!restoreLoading}
+        closeOnEscape={!restoreLoading}
       >
+        <LoadingOverlay visible={restoreLoading} />
         <Stack gap="lg">
           <Alert
-            icon={<IconAlertTriangle size={20} stroke={1.5} />}
+            icon={<IconAlertTriangle size={20} />}
             title="Warning"
-            color="warning"
-            radius="sm"
+            color="orange"
           >
             <Text>
               This will restore the database "{getSelectedConnectionName()}"
@@ -816,16 +759,14 @@ export default function BackupManagerDashboard() {
             <Button
               variant="subtle"
               onClick={() => setRestoreModalOpened(false)}
-              radius="sm"
-              size="sm"
+              disabled={restoreLoading}
             >
               Cancel
             </Button>
             <Button
-              color="warning"
+              color="orange"
               onClick={handleRestore}
-              radius="sm"
-              size="sm"
+              loading={restoreLoading}
             >
               Restore Database
             </Button>
@@ -842,7 +783,7 @@ export default function BackupManagerDashboard() {
             Delete Backup
           </Text>
         }
-        size="lg"
+        size="md"
         centered
       >
         <Stack gap="lg">
@@ -864,7 +805,7 @@ export default function BackupManagerDashboard() {
             >
               Cancel
             </Button>
-            <Button color="red" onClick={handleDelete} loading={deleteLoading}>
+            <Button color="error" onClick={handleDelete} loading={deleteLoading}>
               Delete Backup
             </Button>
           </Group>
