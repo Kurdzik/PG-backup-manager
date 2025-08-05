@@ -109,21 +109,19 @@ export default function DatabaseConnectionsDashboard() {
 
       // Check for successful response
       if (
-        response.status ||
-        response.status?.includes("successfully") ||
-        response.status?.includes("success")
+        response.status == 200
       ) {
         showNotification(
           "success",
           "Connection Test Successful",
-          response.status ||
+          response?.message ||
             "Database connection is valid and working correctly",
         );
       } else {
         showNotification(
           "error",
           "Connection Test Failed",
-          response.status ||
+          response?.message ||
             "Unable to connect to database with provided credentials",
         );
       }
@@ -159,14 +157,11 @@ export default function DatabaseConnectionsDashboard() {
         response = await post("connections/create", formData);
       }
 
-      if (response.status?.includes("successfully") || response.status) {
+      if (response.status==200) {
         showNotification(
           "success",
           "Success",
-          response.status ||
-            response.status ||
-            "Operation completed successfully",
-        );
+          response?.message || "Operation completed successfully");
         setDrawerOpened(false);
         resetForm();
         loadConnections();
@@ -198,7 +193,7 @@ export default function DatabaseConnectionsDashboard() {
       const response: ApiResponse = await del(
         `connections/delete?connection_id=${connectionToDelete.id}`,
       );
-      if (response.status?.includes("successfully")) {
+      if (response.status == 200) {
         showNotification(
           "success",
           "Success",

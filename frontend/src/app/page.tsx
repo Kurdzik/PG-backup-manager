@@ -36,7 +36,8 @@ interface FormData {
 
 interface LoginResponse {
   payload?: string;
-  status: string;
+  message: string,
+  status: number;
 }
 
 interface UserListResponse {
@@ -47,11 +48,12 @@ interface UserListResponse {
     created_at: string;
     updated_at: string;
   }>;
-  status: string;
+  status: number;
 }
 
 interface CreateUserResponse {
-  status: string;
+  status: number;
+  message: string;
 }
 
 export default function AuthPage() {
@@ -76,7 +78,7 @@ export default function AuthPage() {
       const response: UserListResponse = await get("user/list", false);
 
       if (
-        response.status === "OK" &&
+        response.status == 200 &&
         response.data &&
         response.data.length > 0
       ) {
@@ -123,12 +125,12 @@ export default function AuthPage() {
         false,
       );
 
-      if (response.payload && response.status.includes("logged in")) {
+      if (response.payload && response.status==200) {
         console.log("JWT Token:", response.payload);
         setAuthCookie(response.payload);
         window.location.href = "/ui/db_connections";
       } else {
-        setError(response.status || "Login failed");
+        setError(response.message);
       }
     } catch (err: any) {
       setError(err.message || "An error occurred during login");
@@ -154,11 +156,11 @@ export default function AuthPage() {
         false,
       );
 
-      if (response.status === "User created succesfully") {
+      if (response.status ==200) {
         // After successful registration, automatically log in
         await handleLogin();
       } else {
-        setError(response.status || "Registration failed");
+        setError(response.message || "Registration failed");
       }
     } catch (err: any) {
       setError(err.message || "An error occurred during registration");

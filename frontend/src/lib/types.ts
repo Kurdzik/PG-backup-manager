@@ -28,7 +28,8 @@ export interface DatabaseConnection {
 export interface ApiResponse<T = any> {
   data?: T;
   payload?: string[];
-  status?: string;
+  message?: string,
+  status?: number;
   count?: number;
   pagination?: {
     has_next: boolean;

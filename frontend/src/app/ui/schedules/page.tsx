@@ -201,9 +201,7 @@ export default function BackupScheduleDashboard() {
       }
 
       if (
-        response.status?.includes("successfully") ||
-        response.status === "OK"
-      ) {
+        response.status == 200 ) {
         showNotification(
           "success",
           "Success",

@@ -15,94 +15,91 @@ import (
 func CreateBackupDestination(conn *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.Println("CreateBackupDestination handler called")
-
 		var e db.Destination
-
 		testFlag := c.Query("test_connection")
 		log.Printf("CreateBackupDestination request with test_connection=%s", testFlag)
-
 		if err := c.ShouldBindJSON(&e); err != nil {
 			log.Printf("Error binding JSON in CreateBackupDestination: %v", err)
 			c.JSON(http.StatusBadRequest, gin.H{
-				"status": "Invalid request body",
-				"error":  err.Error(),
+				"status":  http.StatusBadRequest,
+				"message": "Invalid request body",
+				"error":   err.Error(),
 			})
 			return
 		}
 		log.Printf("CreateBackupDestination request: Name=%s, ConnectionID=%d, EndpointURL=%s, BucketName=%s",
 			e.Name, e.ConnectionID, e.EndpointURL, e.BucketName)
-
 		encryptedAccessKeyID, err := auth.EncryptString(e.AccessKeyID)
 		if err != nil {
 			log.Printf("Error encrypting access key ID: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"status": "Failed to encrypt credentials",
-				"error":  err.Error(),
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to encrypt credentials",
+				"error":   err.Error(),
 			})
 			return
 		}
 		e.AccessKeyID = encryptedAccessKeyID
-
 		encryptedSecretAccessKey, err := auth.EncryptString(e.SecretAccessKey)
 		if err != nil {
 			log.Printf("Error encrypting secret access key: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"status": "Failed to encrypt credentials",
-				"error":  err.Error(),
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to encrypt credentials",
+				"error":   err.Error(),
 			})
 			return
 		}
 		e.SecretAccessKey = encryptedSecretAccessKey
 		log.Printf("Credentials encrypted successfully for destination: %s", e.Name)
-
 		if e.ConnectionID == 0 {
 			log.Printf("Missing ConnectionID in CreateBackupDestination request")
 			c.JSON(http.StatusBadRequest, gin.H{
-				"status": "Connection ID is required",
+				"status":  http.StatusBadRequest,
+				"message": "Connection ID is required",
 			})
 			return
 		}
-
 		if e.Name == "" {
 			log.Printf("Missing Name in CreateBackupDestination request")
 			c.JSON(http.StatusBadRequest, gin.H{
-				"status": "Name is required",
+				"status":  http.StatusBadRequest,
+				"message": "Name is required",
 			})
 			return
 		}
-
 		if e.EndpointURL == "" {
 			log.Printf("Missing EndpointURL in CreateBackupDestination request")
 			c.JSON(http.StatusBadRequest, gin.H{
-				"status": "Endpoint URL is required",
+				"status":  http.StatusBadRequest,
+				"message": "Endpoint URL is required",
 			})
 			return
 		}
-
 		if e.BucketName == "" {
 			log.Printf("Missing BucketName in CreateBackupDestination request")
 			c.JSON(http.StatusBadRequest, gin.H{
-				"status": "Bucket name is required",
+				"status":  http.StatusBadRequest,
+				"message": "Bucket name is required",
 			})
 			return
 		}
-
 		if e.AccessKeyID == "" {
 			log.Printf("Missing AccessKeyID in CreateBackupDestination request")
 			c.JSON(http.StatusBadRequest, gin.H{
-				"status": "Access Key ID is required",
+				"status":  http.StatusBadRequest,
+				"message": "Access Key ID is required",
 			})
 			return
 		}
-
 		if e.SecretAccessKey == "" {
 			log.Printf("Missing SecretAccessKey in CreateBackupDestination request")
 			c.JSON(http.StatusBadRequest, gin.H{
-				"status": "Secret Access Key is required",
+				"status":  http.StatusBadRequest,
+				"message": "Secret Access Key is required",
 			})
 			return
 		}
-
 		if testFlag == "true" {
 			log.Printf("Testing S3 connection for destination: %s", e.Name)
 			S3Client, err := backup_manager.NewS3Client(e.Name,
@@ -117,56 +114,58 @@ func CreateBackupDestination(conn *gorm.DB) gin.HandlerFunc {
 			if err != nil {
 				log.Printf("Error creating S3 client for connection test: %v", err)
 				c.JSON(http.StatusInternalServerError, gin.H{
-					"status": "Failed to create S3 client",
-					"error":  err.Error(),
+					"status":  http.StatusInternalServerError,
+					"message": "Failed to create S3 client",
+					"error":   err.Error(),
 				})
 				return
 			}
-
 			if !S3Client.TestConnection() {
 				log.Printf("S3 connection test failed for destination: %s", e.Name)
 				c.JSON(http.StatusRequestTimeout, gin.H{
-					"status": "Could not reach specified backup destination",
+					"status":  http.StatusRequestTimeout,
+					"message": "Could not reach specified backup destination",
 				})
 				return
 			} else {
 				log.Printf("S3 connection test successful for destination: %s", e.Name)
 				c.JSON(http.StatusOK, gin.H{
-					"status": "Conection Test successful",
+					"status":  http.StatusOK,
+					"message": "Conection Test successful",
 				})
 				return
 			}
 		}
-
 		if err := conn.Create(&e).Error; err != nil {
 			if isDuplicateKeyError(err) {
 				log.Printf("Duplicate backup destination name attempted: %s", e.Name)
 				c.JSON(http.StatusConflict, gin.H{
-					"status": "A backup destination with this name already exists",
+					"status":  http.StatusConflict,
+					"message": "A backup destination with this name already exists",
 				})
 				return
 			}
-
 			if isForeignKeyError(err) {
 				log.Printf("Invalid connection ID in CreateBackupDestination: %d", e.ConnectionID)
 				c.JSON(http.StatusBadRequest, gin.H{
-					"status": "Invalid connection ID - connection does not exist",
+					"status":  http.StatusBadRequest,
+					"message": "Invalid connection ID - connection does not exist",
 				})
 				return
 			}
-
 			log.Printf("Error creating backup destination in database: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"status": "Failed to create backup destination",
-				"error":  err.Error(),
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to create backup destination",
+				"error":   err.Error(),
 			})
 			return
 		}
-
 		log.Printf("Backup destination created successfully: %s (ID: %d)", e.Name, e.ID)
-		c.JSON(http.StatusCreated, gin.H{
-			"status": "Backup destination created successfully",
-			"data":   e,
+		c.JSON(http.StatusOK, gin.H{
+			"status":  http.StatusOK,
+			"message": "Backup destination created successfully",
+			"data":    e,
 		})
 	}
 }
@@ -174,15 +173,11 @@ func CreateBackupDestination(conn *gorm.DB) gin.HandlerFunc {
 func ListAllBackupDestinations(conn *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.Println("ListAllBackupDestinations handler called")
-
 		var destinations []db.Destination
-
 		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 		limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 		connectionID := c.Query("connection_id")
-
 		log.Printf("ListAllBackupDestinations request: page=%d, limit=%d, connection_id=%s", page, limit, connectionID)
-
 		if page < 1 {
 			page = 1
 			log.Printf("Invalid page parameter, defaulting to 1")
@@ -191,11 +186,8 @@ func ListAllBackupDestinations(conn *gorm.DB) gin.HandlerFunc {
 			limit = 10
 			log.Printf("Invalid limit parameter, defaulting to 10")
 		}
-
 		offset := (page - 1) * limit
-
 		query := conn.Model(&db.Destination{})
-
 		// Filter by connection_id if provided
 		if connectionID != "" {
 			if connID, err := strconv.ParseUint(connectionID, 10, 32); err == nil {
@@ -205,32 +197,32 @@ func ListAllBackupDestinations(conn *gorm.DB) gin.HandlerFunc {
 				log.Printf("Invalid connection_id parameter: %s", connectionID)
 			}
 		}
-
 		var total int64
 		if err := query.Count(&total).Error; err != nil {
 			log.Printf("Error counting backup destinations: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"status": "Failed to count backup destinations",
-				"error":  err.Error(),
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to count backup destinations",
+				"error":   err.Error(),
 			})
 			return
 		}
 		log.Printf("Found %d total backup destinations", total)
-
 		if err := query.Offset(offset).Limit(limit).Find(&destinations).Error; err != nil {
 			log.Printf("Error retrieving backup destinations: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"status": "Failed to retrieve backup destinations",
-				"error":  err.Error(),
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to retrieve backup destinations",
+				"error":   err.Error(),
 			})
 			return
 		}
-
 		totalPages := (int(total) + limit - 1) / limit
 		log.Printf("Retrieved %d backup destinations (page %d of %d)", len(destinations), page, totalPages)
-
 		c.JSON(http.StatusOK, gin.H{
-			"data": destinations,
+			"status":  http.StatusOK,
+			"message": "OK",
+			"data":    destinations,
 			"pagination": gin.H{
 				"page":        page,
 				"limit":       limit,
@@ -246,49 +238,47 @@ func ListAllBackupDestinations(conn *gorm.DB) gin.HandlerFunc {
 func UpdateBackupDestination(conn *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.Println("UpdateBackupDestination handler called")
-
 		destinationId := c.Query("destination_id")
 		log.Printf("UpdateBackupDestination request: destination_id=%s", destinationId)
-
 		id, err := strconv.ParseUint(destinationId, 10, 32)
 		if err != nil {
 			log.Printf("Invalid destination ID format in UpdateBackupDestination: %s", destinationId)
 			c.JSON(http.StatusBadRequest, gin.H{
-				"status": "Invalid ID format",
+				"status":  http.StatusBadRequest,
+				"message": "Invalid ID format",
 			})
 			return
 		}
-
 		var existing db.Destination
 		if err := conn.First(&existing, uint(id)).Error; err != nil {
 			if err == gorm.ErrRecordNotFound {
 				log.Printf("Backup destination not found: ID=%d", uint(id))
 				c.JSON(http.StatusNotFound, gin.H{
-					"status": "Backup destination not found",
+					"status":  http.StatusNotFound,
+					"message": "Backup destination not found",
 				})
 				return
 			}
-
 			log.Printf("Error retrieving backup destination for update: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"status": "Failed to retrieve backup destination",
-				"error":  err.Error(),
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to retrieve backup destination",
+				"error":   err.Error(),
 			})
 			return
 		}
 		log.Printf("Retrieved existing backup destination: %s (ID: %d)", existing.Name, existing.ID)
-
 		var updates db.Destination
 		if err := c.ShouldBindJSON(&updates); err != nil {
 			log.Printf("Error binding JSON in UpdateBackupDestination: %v", err)
 			c.JSON(http.StatusBadRequest, gin.H{
-				"status": "Invalid request body",
-				"error":  err.Error(),
+				"status":  http.StatusBadRequest,
+				"message": "Invalid request body",
+				"error":   err.Error(),
 			})
 			return
 		}
 		log.Printf("Update request parsed for destination: %s", existing.Name)
-
 		if updates.ConnectionID != 0 && updates.ConnectionID != existing.ConnectionID {
 			existing.ConnectionID = updates.ConnectionID
 			log.Printf("Updated ConnectionID to: %d", updates.ConnectionID)
@@ -321,40 +311,39 @@ func UpdateBackupDestination(conn *gorm.DB) gin.HandlerFunc {
 			existing.PathPrefix = updates.PathPrefix
 			log.Printf("Updated PathPrefix to: %s", updates.PathPrefix)
 		}
-
 		existing.UseSSL = updates.UseSSL
 		existing.VerifySSL = updates.VerifySSL
 		log.Printf("Updated SSL settings: UseSSL=%t, VerifySSL=%t", updates.UseSSL, updates.VerifySSL)
-
 		if err := conn.Save(&existing).Error; err != nil {
 			if isDuplicateKeyError(err) {
 				log.Printf("Duplicate backup destination name in update: %s", existing.Name)
 				c.JSON(http.StatusConflict, gin.H{
-					"status": "A backup destination with this name already exists",
+					"status":  http.StatusConflict,
+					"message": "A backup destination with this name already exists",
 				})
 				return
 			}
-
 			if isForeignKeyError(err) {
 				log.Printf("Invalid connection ID in update: %d", existing.ConnectionID)
 				c.JSON(http.StatusBadRequest, gin.H{
-					"status": "Invalid connection ID - connection does not exist",
+					"status":  http.StatusBadRequest,
+					"message": "Invalid connection ID - connection does not exist",
 				})
 				return
 			}
-
 			log.Printf("Error updating backup destination in database: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"status": "Failed to update backup destination",
-				"error":  err.Error(),
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to update backup destination",
+				"error":   err.Error(),
 			})
 			return
 		}
-
 		log.Printf("Backup destination updated successfully: %s (ID: %d)", existing.Name, existing.ID)
 		c.JSON(http.StatusOK, gin.H{
-			"status": "Backup destination updated successfully",
-			"data":   existing,
+			"status":  http.StatusOK,
+			"message": "Backup destination updated successfully",
+			"data":    existing,
 		})
 	}
 }
@@ -362,50 +351,49 @@ func UpdateBackupDestination(conn *gorm.DB) gin.HandlerFunc {
 func DeleteBackupDestination(conn *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.Println("DeleteBackupDestination handler called")
-
 		destinationId := c.Query("destination_id")
 		log.Printf("DeleteBackupDestination request: destination_id=%s", destinationId)
-
 		id, err := strconv.ParseUint(destinationId, 10, 32)
 		if err != nil {
 			log.Printf("Invalid destination ID format in DeleteBackupDestination: %s", destinationId)
 			c.JSON(http.StatusBadRequest, gin.H{
-				"status": "Invalid ID format",
+				"status":  http.StatusBadRequest,
+				"message": "Invalid ID format",
 			})
 			return
 		}
-
 		var destination db.Destination
 		if err := conn.First(&destination, uint(id)).Error; err != nil {
 			if err == gorm.ErrRecordNotFound {
 				log.Printf("Backup destination not found for deletion: ID=%d", uint(id))
 				c.JSON(http.StatusNotFound, gin.H{
-					"status": "Backup destination not found",
+					"status":  http.StatusNotFound,
+					"message": "Backup destination not found",
 				})
 				return
 			}
-
 			log.Printf("Error retrieving backup destination for deletion: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"status": "Failed to retrieve backup destination",
-				"error":  err.Error(),
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to retrieve backup destination",
+				"error":   err.Error(),
 			})
 			return
 		}
 		log.Printf("Retrieved backup destination for deletion: %s (ID: %d)", destination.Name, destination.ID)
-
 		if err := conn.Delete(&destination).Error; err != nil {
 			log.Printf("Error deleting backup destination from database: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"status": "Failed to delete backup destination",
-				"error":  err.Error(),
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to delete backup destination",
+				"error":   err.Error(),
 			})
 			return
 		}
-
 		log.Printf("Backup destination deleted successfully: %s (ID: %d)", destination.Name, destination.ID)
 		c.JSON(http.StatusOK, gin.H{
-			"status": "Backup destination deleted successfully",
+			"status":  http.StatusOK,
+			"message": "Backup destination deleted successfully",
 		})
 	}
 }

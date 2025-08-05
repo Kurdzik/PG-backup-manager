@@ -308,7 +308,7 @@ export default function BackupManagerDashboard() {
         backup_destination: backupDestination,
       });
 
-      if (response.status === "OK") {
+      if (response.status == 200) {
         showNotification("success", "Success", "Backup created successfully");
         loadBackups(); // Refresh the backup list
       }
@@ -331,7 +331,7 @@ export default function BackupManagerDashboard() {
         backup_filename: selectedBackupFile,
       });
 
-      if (response.status === "OK") {
+      if (response.status == 200) {
         showNotification(
           "success",
           "Success",
@@ -357,7 +357,7 @@ export default function BackupManagerDashboard() {
         `backup/delete?database_id=${selectedDatabase}&destination=${backupDestination}&filename=${selectedBackupFile}`,
       );
 
-      if (response.status === "OK") {
+      if (response.status == 200) {
         showNotification("success", "Success", "Backup deleted successfully");
         loadBackups(); // Refresh the backup list
       }

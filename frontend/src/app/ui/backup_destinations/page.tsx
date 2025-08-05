@@ -135,8 +135,7 @@ export default function S3BackupDestinations() {
 
       // Check for successful response
       if (
-        response.status?.includes("successfully") ||
-        response.status?.includes("success")
+        response.status==200
       ) {
         showNotification(
           "success",
@@ -189,11 +188,11 @@ export default function S3BackupDestinations() {
         response = await post("backup-destinations/s3/create", payload);
       }
 
-      if (response.status || response.status?.includes("successfully")) {
+      if (response.status==200) {
         showNotification(
           "success",
           "Success",
-          response.status || "Operation completed successfully",
+          response?.message || "Operation completed successfully",
         );
         setDrawerOpened(false);
         resetForm();
