@@ -134,9 +134,7 @@ export default function S3BackupDestinations() {
       );
 
       // Check for successful response
-      if (
-        response.status==200
-      ) {
+      if (response.status == 200) {
         showNotification(
           "success",
           "Connection Test Successful",
@@ -188,7 +186,7 @@ export default function S3BackupDestinations() {
         response = await post("backup-destinations/s3/create", payload);
       }
 
-      if (response.status==200) {
+      if (response.status == 200) {
         showNotification(
           "success",
           "Success",

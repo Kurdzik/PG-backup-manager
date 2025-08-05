@@ -2,7 +2,13 @@ export const setAuthCookie = (token: string) => {
   const payload = JSON.parse(atob(token.split(".")[1]));
   const expDate = new Date(payload.exp * 1000);
 
-  document.cookie = `auth_token=${token}; expires=${expDate.toUTCString()}; path=/; secure; samesite=strict`;
+  let cookieString = `auth_token=${token}; expires=${expDate.toUTCString()}; path=/; samesite=strict`;
+
+  if (window.location.protocol === "https:") {
+    cookieString += "; secure";
+  }
+
+  document.cookie = cookieString;
 };
 
 export const getAuthCookie = (): string => {
@@ -19,8 +25,14 @@ export const getAuthCookie = (): string => {
 };
 
 export const removeAuthCookie = (): void => {
-  document.cookie =
-    "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; secure; samesite=strict";
+  let cookieString =
+    "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; samesite=strict";
+
+  if (window.location.protocol === "https:") {
+    cookieString += "; secure";
+  }
+
+  document.cookie = cookieString;
 };
 
 export const isAuthenticated = (): boolean => {
@@ -34,6 +46,7 @@ export const isAuthenticated = (): boolean => {
 
     return payload.exp > currentTime;
   } catch (error) {
+    console.error("Error validating authentication token:", error);
     return false;
   }
 };

@@ -805,7 +805,11 @@ export default function BackupManagerDashboard() {
             >
               Cancel
             </Button>
-            <Button color="error" onClick={handleDelete} loading={deleteLoading}>
+            <Button
+              color="error"
+              onClick={handleDelete}
+              loading={deleteLoading}
+            >
               Delete Backup
             </Button>
           </Group>

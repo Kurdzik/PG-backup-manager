@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import {
-
   Title,
   Text,
   Button,
@@ -20,11 +19,8 @@ import {
   Flex,
   Alert,
   Box,
-
   Drawer,
-
   Card,
-
   SimpleGrid,
   Tooltip,
   Code,
@@ -35,7 +31,6 @@ import {
   IconEdit,
   IconTrash,
   IconRefresh,
-
   IconX,
   IconInfoCircle,
   IconDatabase,
@@ -44,7 +39,6 @@ import {
   IconPlayerPlay,
   IconPlayerPause,
   IconActivity,
-
   IconCheckbox,
   IconClockHour3,
   IconHistory,
@@ -200,8 +194,7 @@ export default function BackupScheduleDashboard() {
         response = await post("schedules/create", payload);
       }
 
-      if (
-        response.status == 200 ) {
+      if (response.status == 200) {
         showNotification(
           "success",
           "Success",

@@ -200,7 +200,6 @@ export const SidebarComponent = () => {
     }
   };
 
-
   const handleLogout = async () => {
     try {
       await removeAuthCookie();
@@ -306,7 +305,7 @@ export const SidebarComponent = () => {
                 />
               ))}
             </Stack>
-          </Box> 
+          </Box>
         </Stack>
       </ScrollArea>
 

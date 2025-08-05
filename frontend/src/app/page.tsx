@@ -36,7 +36,7 @@ interface FormData {
 
 interface LoginResponse {
   payload?: string;
-  message: string,
+  message: string;
   status: number;
 }
 
@@ -77,11 +77,7 @@ export default function AuthPage() {
       setCheckingUsers(true);
       const response: UserListResponse = await get("user/list", false);
 
-      if (
-        response.status == 200 &&
-        response.data &&
-        response.data.length > 0
-      ) {
+      if (response.status == 200 && response.data && response.data.length > 0) {
         setHasUsers(true);
         setIsRegistration(false);
       } else {
@@ -125,8 +121,7 @@ export default function AuthPage() {
         false,
       );
 
-      if (response.payload && response.status==200) {
-        console.log("JWT Token:", response.payload);
+      if (response.payload && response.status == 200) {
         setAuthCookie(response.payload);
         window.location.href = "/ui/db_connections";
       } else {
@@ -156,7 +151,7 @@ export default function AuthPage() {
         false,
       );
 
-      if (response.status ==200) {
+      if (response.status == 200) {
         // After successful registration, automatically log in
         await handleLogin();
       } else {
@@ -454,9 +449,7 @@ export default function AuthPage() {
             </Stack>
 
             {/* Footer */}
-            <Box ta="center" mt="md">
-
-            </Box>
+            <Box ta="center" mt="md"></Box>
           </Stack>
         </Paper>
       </Container>

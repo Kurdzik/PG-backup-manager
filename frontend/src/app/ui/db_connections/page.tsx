@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import {
-
   Title,
   Text,
   Button,
@@ -20,7 +19,6 @@ import {
   Flex,
   Alert,
   Box,
-
   Drawer,
 } from "@mantine/core";
 import {
@@ -108,9 +106,7 @@ export default function DatabaseConnectionsDashboard() {
       );
 
       // Check for successful response
-      if (
-        response.status == 200
-      ) {
+      if (response.status == 200) {
         showNotification(
           "success",
           "Connection Test Successful",
@@ -157,11 +153,12 @@ export default function DatabaseConnectionsDashboard() {
         response = await post("connections/create", formData);
       }
 
-      if (response.status==200) {
+      if (response.status == 200) {
         showNotification(
           "success",
           "Success",
-          response?.message || "Operation completed successfully");
+          response?.message || "Operation completed successfully",
+        );
         setDrawerOpened(false);
         resetForm();
         loadConnections();

@@ -1,21 +1,6 @@
 "use client";
-import {
-
-  Text,
-  Paper,
-  ActionIcon,
-  Flex,
-  Box,
-  rem,
-
-} from "@mantine/core";
-import {
-
-  IconCheck,
-  IconX,
-
-} from "@tabler/icons-react";
-
+import { Text, Paper, ActionIcon, Flex, Box, rem } from "@mantine/core";
+import { IconCheck, IconX } from "@tabler/icons-react";
 
 export interface NotificationData {
   type: "success" | "error";
